@@ -6,3 +6,5 @@ env/
 .idea/
 .vscode/
 *.VSCodeCounter/
+00_Raw_Data/
+01_Processed/
