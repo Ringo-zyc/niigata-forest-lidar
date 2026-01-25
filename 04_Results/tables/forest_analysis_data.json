@@ -1,0 +1,47 @@
+{
+  "metadata": {
+    "date": "2026-01-25 21:00:09",
+    "original_count": 61,
+    "cleaned_count": 61,
+    "removed_count": 0,
+    "height_adjusted_count": 59
+  },
+  "cleaning_parameters": {
+    "min_diameter_cm": 5.0,
+    "max_diameter_cm": 100.0,
+    "min_points": 30,
+    "min_height_m": 1.0,
+    "max_height_m": 80.0
+  },
+  "statistics": {
+    "dbh_mean": 13.516557377049182,
+    "dbh_std": 1.2425040378819723,
+    "dbh_min": 10.52,
+    "dbh_max": 15.7,
+    "height_mean": 12.12739344262295,
+    "height_std": 1.4144507093884953,
+    "height_min": 5.57,
+    "height_max": 14.75
+  },
+  "biomass": {
+    "total_agb_kg": 3279.3718175881295,
+    "total_agb_ton": 3.2793718175881295,
+    "total_carbon_kg": 1541.3047542664208,
+    "total_carbon_ton": 1.5413047542664209,
+    "mean_agb_kg": 53.76019373095294,
+    "mean_carbon_kg": 25.267291053547883
+  },
+  "diameter_distribution": [
+    {
+      "class": "[10, 15)",
+      "count": 54,
+      "percentage": 88.52459016393442
+    },
+    {
+      "class": "[15, 20)",
+      "count": 7,
+      "percentage": 11.475409836065573
+    }
+  ],
+  "cleaning_log": []
+}
