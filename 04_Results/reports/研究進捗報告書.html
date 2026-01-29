@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UAV搭載LiDARによる単木識別と樹木情報自動計測 - 研究進捗報告書</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+            line-height: 1.8;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background: #fafafa;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4 {
+            color: #1a5f2a;
+            margin: 1.5em 0 0.8em;
+        }
+
+        h1 {
+            font-size: 2em;
+            text-align: center;
+            border-bottom: 3px solid #1a5f2a;
+            padding-bottom: 20px;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            font-size: 1.5em;
+            border-left: 5px solid #2e8b57;
+            padding-left: 15px;
+            margin-top: 2em;
+        }
+
+        h3 {
+            font-size: 1.2em;
+            color: #2e8b57;
+        }
+
+        .header-info {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #666;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            margin: 5px;
+        }
+
+        .badge-green {
+            background: #2e8b57;
+            color: white;
+        }
+
+        .badge-blue {
+            background: #4169e1;
+            color: white;
+        }
+
+        .badge-orange {
+            background: #ff8c00;
+            color: white;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1em 0;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background: #f5f5f5;
+            font-weight: bold;
+            color: #1a5f2a;
+        }
+
+        tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        .important-box {
+            background: #e8f5e9;
+            border-left: 5px solid #2e8b57;
+            padding: 15px 20px;
+            margin: 1em 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .note-box {
+            background: #e3f2fd;
+            border-left: 5px solid #1976d2;
+            padding: 15px 20px;
+            margin: 1em 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .warning-box {
+            background: #fff3e0;
+            border-left: 5px solid #ff9800;
+            padding: 15px 20px;
+            margin: 1em 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        code {
+            background: #f5f5f5;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: "Monaco", "Consolas", monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1em 0;
+        }
+
+        pre code {
+            background: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .screenshot {
+            width: 100%;
+            max-width: 800px;
+            margin: 1em auto;
+            display: block;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .screenshot-caption {
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 1.5em;
+        }
+
+        .toc {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin: 2em 0;
+        }
+
+        .toc ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .toc li {
+            padding: 8px 0;
+            border-bottom: 1px dashed #eee;
+        }
+
+        .toc a {
+            color: #2e8b57;
+            text-decoration: none;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 1.5em 0;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #2e8b57;
+        }
+
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .workflow-diagram {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 1em 0;
+        }
+
+        .workflow-step {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #e8f5e9;
+            border-radius: 25px;
+            margin: 5px;
+            border: 2px solid #2e8b57;
+        }
+
+        .workflow-arrow {
+            display: inline-block;
+            margin: 0 10px;
+            color: #2e8b57;
+            font-size: 1.5em;
+        }
+
+        hr {
+            border: none;
+            border-top: 2px solid #eee;
+            margin: 2em 0;
+        }
+
+        .footer {
+            text-align: center;
+            color: #666;
+            padding-top: 30px;
+            border-top: 2px solid #eee;
+            margin-top: 40px;
+        }
+
+        .distribution-bar {
+            background: #e8f5e9;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 1em 0;
+            font-family: monospace;
+        }
+
+        .dataset-section {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 1em 0;
+        }
+
+        .dataset-title {
+            color: #1a5f2a;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 20px;
+            }
+
+            .screenshot {
+                max-width: 100%;
+                page-break-inside: avoid;
+            }
+
+            h2 {
+                page-break-after: avoid;
+            }
+
+            table {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>🌲 UAV搭載LiDARによる単木識別と樹木情報自動計測</h1>
+
+    <div class="header-info">
+        <h2 style="border: none; text-align: center; padding: 0; margin: 10px 0;">研究進捗報告書（予備調査段階）</h2>
+        <p>
+            <span class="badge badge-green">バージョン 1.0</span>
+            <span class="badge badge-blue">ステータス: 予備調査・学習段階</span>
+            <span class="badge badge-orange">報告日: 2026年01月29日</span>
+        </p>
+        <p><strong>新潟森林調査プロジェクト</strong></p>
+    </div>
+
+    <hr>
+
+    <div class="warning-box">
+        <strong>📌 本報告書について:</strong>
+        本報告書は研究の予備調査段階における学習内容と初期的な処理の試行結果をまとめたものです。記載されている手法や結果は今後の本格的な研究に向けた探索的なものであり、最終的な研究成果ではありません。
+    </div>
+
+    <div class="toc">
+        <h3>📋 目次</h3>
+        <ul>
+            <li>1. <a href="#sec1">研究背景と目的</a></li>
+            <li>2. <a href="#sec2">使用データセット</a></li>
+            <li>3. <a href="#sec3">学習した処理フロー</a></li>
+            <li>4. <a href="#sec4">試行結果（データセット別）</a></li>
+            <li>5. <a href="#sec5">現段階の課題認識</a></li>
+            <li>6. <a href="#sec6">今後の学習・研究の可能性</a></li>
+        </ul>
+    </div>
+
+    <hr>
+
+    <h2 id="sec1">1. 研究背景と目的</h2>
+
+    <h3>1.1 研究テーマ</h3>
+    <p>本研究では、<strong>UAV搭載LiDAR点群データを用いた単木識別と樹木情報の自動計測</strong>について学習し、基本的な処理フローの理解を深めることを目指しています。</p>
+
+    <h3>1.2 予備調査の目的</h3>
+    <p>この段階では、以下の点について理解を深めることを目的としています：</p>
+    <ul>
+        <li>点群データの基本的な前処理方法の習得</li>
+        <li>CloudCompareなど既存ツールの操作方法の理解</li>
+        <li>単木検出の基本的なアプローチの把握</li>
+        <li>今後の研究に向けた課題と可能性の整理</li>
+    </ul>
+
+    <h3>1.3 現段階の到達点</h3>
+    <div class="note-box">
+        本報告書は学習段階の記録であり、基本的な処理フローを試行した結果をまとめています。アルゴリズムの評価や手法の比較検討は今後の課題です。
+    </div>
+
+    <hr>
+
+    <h2 id="sec2">2. 使用データセット</h2>
+
+    <p>予備調査では、2つのオープンデータセットを使用して処理フローの学習を行いました。</p>
+
+    <div class="dataset-section">
+        <div class="dataset-title">📁 データセット1: San Juan Fault</div>
+        <table>
+            <tr>
+                <th>項目</th>
+                <th>内容</th>
+            </tr>
+            <tr>
+                <td>データサイズ</td>
+                <td>約1.1 GB</td>
+            </tr>
+            <tr>
+                <td>地形特性</td>
+                <td>山岳地形</td>
+            </tr>
+            <tr>
+                <td>使用目的</td>
+                <td>CSFフィルタリング、高さ正規化の学習</td>
+            </tr>
+            <tr>
+                <td>処理状況</td>
+                <td>前処理フローの試行</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="dataset-section">
+        <div class="dataset-title">📁 データセット2: StREAM Lab</div>
+        <table>
+            <tr>
+                <th>項目</th>
+                <th>内容</th>
+            </tr>
+            <tr>
+                <td>データサイズ</td>
+                <td>約473 MB</td>
+            </tr>
+            <tr>
+                <td>地形特性</td>
+                <td>比較的平坦な森林区域</td>
+            </tr>
+            <tr>
+                <td>使用目的</td>
+                <td>RANSAC円筒検出の試行</td>
+            </tr>
+            <tr>
+                <td>処理状況</td>
+                <td>単木検出アルゴリズムの初期テスト</td>
+            </tr>
+        </table>
+    </div>
+
+    <hr>
+
+    <h2 id="sec3">3. 学習した処理フロー</h2>
+
+    <h3>3.1 全体の流れ</h3>
+    <div class="workflow-diagram">
+        <span class="workflow-step">点群データ読込</span>
+        <span class="workflow-arrow">→</span>
+        <span class="workflow-step">前処理</span>
+        <span class="workflow-arrow">→</span>
+        <span class="workflow-step">単木検出</span>
+        <span class="workflow-arrow">→</span>
+        <span class="workflow-step">パラメータ抽出</span>
+    </div>
+
+    <h3>3.2 学習した主な処理ステップ</h3>
+
+    <h4>① データ読込とGlobal Shift設定</h4>
+    <p>大規模座標系のデータを扱うための基本設定を学習しました。</p>
+    <img class="screenshot" src="images/打开文件前的询问设置.png" alt="ファイル読込設定">
+    <p class="screenshot-caption">図1: 読込設定画面</p>
+
+    <img class="screenshot" src="images/Global Shift:Scale.png" alt="Global Shift設定">
+    <p class="screenshot-caption">図2: Global Shift設定</p>
+
+    <h4>② CSF（Cloth Simulation Filter）による地面フィルタリング</h4>
+    <p>地面点と非地面点を分離する手法について学習しました。</p>
+    <img class="screenshot" src="images/CSF (布料模拟滤波)算法处理.png" alt="CSFフィルタリング">
+    <p class="screenshot-caption">図3: CSFフィルタリング画面</p>
+
+    <img class="screenshot" src="images/Exp1_CSF_Ground_BadAndGood_IsoView.png" alt="CSF結果">
+    <p class="screenshot-caption">図4: CSF処理結果の例</p>
+
+    <h4>③ 高さ正規化</h4>
+    <p>地面からの相対高さを計算する処理を試行しました。</p>
+    <img class="screenshot" src="images/高度归一化.png" alt="高さ正規化">
+    <p class="screenshot-caption">図5: 高さ正規化処理</p>
+
+    <img class="screenshot" src="images/高度归一化计算后的渲染图.png" alt="正規化結果">
+    <p class="screenshot-caption">図6: 正規化後のレンダリング</p>
+
+    <h4>④ 領域抽出とスライス処理</h4>
+    <p>対象領域の切り出し方法を学習しました。</p>
+    <img class="screenshot" src="images/裁剪盒 (Clipping Box)工具.png" alt="クリッピング">
+    <p class="screenshot-caption">図7: クリッピングボックスツール</p>
+
+    <img class="screenshot" src="images/切片(Slice).png" alt="スライス">
+    <p class="screenshot-caption">図8: スライス処理</p>
+
+    <h4>⑤ RANSAC円筒検出の試行</h4>
+    <p>伝統的な形状検出アルゴリズムの一つとして、RANSAC円筒フィッティングを試行しました。</p>
+    <img class="screenshot" src="images/RANSAC设置.png" alt="RANSAC設定">
+    <p class="screenshot-caption">図9: RANSAC設定画面</p>
+
+    <img class="screenshot" src="images/RANSAC结果.png" alt="RANSAC結果">
+    <p class="screenshot-caption">図10: RANSAC検出結果の例</p>
+
+    <hr>
+
+    <h2 id="sec4">4. 試行結果（データセット別）</h2>
+
+    <h3>4.1 San Juan Fault データセット</h3>
+    <div class="dataset-section">
+        <p><strong>主な試行内容:</strong></p>
+        <ul>
+            <li>CSFフィルタリングによる地面点分離を試行</li>
+            <li>高さ正規化処理の適用</li>
+            <li>異なる高さでのスライス切り出し</li>
+        </ul>
+        <p><strong>確認できた点:</strong></p>
+        <ul>
+            <li>山岳地形ではCSFパラメータの調整が必要</li>
+            <li>データサイズが大きく、処理に時間がかかる</li>
+        </ul>
+    </div>
+
+    <img class="screenshot" src="images/俯视图_地面红色.png" alt="San Juan俯瞰図">
+    <p class="screenshot-caption">図11: San Juan Fault データの俯瞰図</p>
+
+    <img class="screenshot" src="images/5m切片ransac识别结果.png" alt="5mスライス結果">
+    <p class="screenshot-caption">図12: 5mスライスでの処理試行</p>
+
+    <h3>4.2 StREAM Lab データセット</h3>
+    <div class="dataset-section">
+        <p><strong>主な試行内容:</strong></p>
+        <ul>
+            <li>RANSAC円筒フィッティングによる樹幹検出の試行</li>
+            <li>検出結果のCSV出力</li>
+            <li>基本的な統計値の確認</li>
+        </ul>
+        <p><strong>試行結果の概要（参考値）:</strong></p>
+        <table>
+            <tr>
+                <th>項目</th>
+                <th>値（参考）</th>
+            </tr>
+            <tr>
+                <td>検出された円筒数</td>
+                <td>61個</td>
+            </tr>
+            <tr>
+                <td>推定DBH範囲</td>
+                <td>約10〜16 cm</td>
+            </tr>
+        </table>
+        <p><em>※これらの値は試行段階の参考値であり、精度検証は未実施です。</em></p>
+    </div>
+
+    <img class="screenshot" src="images/segment.png" alt="セグメント処理">
+    <p class="screenshot-caption">図13: StREAM Labデータのセグメント処理</p>
+
+    <hr>
+
+    <h2 id="sec5">5. 現段階の課題認識</h2>
+
+    <h3>5.1 技術的な課題</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>課題</th>
+                <th>詳細</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>アルゴリズムの選択</td>
+                <td>RANSAC以外にも様々な手法があり、比較検討が必要</td>
+            </tr>
+            <tr>
+                <td>パラメータ調整</td>
+                <td>データセットや地形に応じた最適化方法の理解が必要</td>
+            </tr>
+            <tr>
+                <td>精度検証方法</td>
+                <td>検出結果の評価方法について学習が必要</td>
+            </tr>
+            <tr>
+                <td>前処理の自動化</td>
+                <td>現状は手動操作が多く、効率化の余地がある</td>
+            </tr>
+            <tr>
+                <td>大規模データ処理</td>
+                <td>メモリ管理や分割処理の手法を学ぶ必要がある</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>5.2 理解を深めるべき分野</h3>
+    <ul>
+        <li>点群処理の理論的背景</li>
+        <li>森林計測学の基礎知識</li>
+        <li>既存研究のレビュー</li>
+        <li>プログラミング（Python、Open3D等）のスキル向上</li>
+    </ul>
+
+    <hr>
+
+    <h2 id="sec6">6. 今後の学習・研究の可能性</h2>
+
+    <div class="important-box">
+        <strong>📌 注記:</strong> 以下は今後学習・検討していく可能性のある方向性の一覧です。具体的な研究計画は今後の学習を通じて決定していきます。
+    </div>
+
+    <h3>6.1 アルゴリズム・手法に関する可能性</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>カテゴリ</th>
+                <th>手法・アプローチの例</th>
+                <th>特徴</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>伝統的アルゴリズム</strong></td>
+                <td>
+                    • RANSAC（改良版含む）<br>
+                    • 分水岭法（Watershed）<br>
+                    • 領域成長法（Region Growing）<br>
+                    • クラスタリング（DBSCAN等）<br>
+                    • Hough変換
+                </td>
+                <td>解釈性が高い、パラメータ調整が必要</td>
+            </tr>
+            <tr>
+                <td><strong>機械学習</strong></td>
+                <td>
+                    • PointNet / PointNet++<br>
+                    • 3D-CNN<br>
+                    • Random Forest<br>
+                    • Semantic Segmentation
+                </td>
+                <td>高精度の可能性、大量の学習データが必要</td>
+            </tr>
+            <tr>
+                <td><strong>ハイブリッド手法</strong></td>
+                <td>
+                    • 伝統手法＋機械学習の組み合わせ<br>
+                    • マルチスケール解析
+                </td>
+                <td>各手法の長所を活かす可能性</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>6.2 処理パイプラインに関する可能性</h3>
+    <ul>
+        <li>自動化されたワークフローの構築</li>
+        <li>GUIツールの開発・改良</li>
+        <li>バッチ処理システムの検討</li>
+        <li>クラウド処理環境の活用</li>
+    </ul>
+
+    <h3>6.3 応用分野に関する可能性</h3>
+    <ul>
+        <li>異なる樹種・森林タイプへの適用可能性の検討</li>
+        <li>時系列データを用いた成長モニタリング</li>
+        <li>バイオマス推定・炭素貯蔵量評価への応用</li>
+        <li>森林管理・林業への実用化</li>
+    </ul>
+
+    <h3>6.4 精度・検証に関する可能性</h3>
+    <ul>
+        <li>地上真値データとの照合方法の検討</li>
+        <li>他の計測手法（TLS等）との比較</li>
+        <li>誤差要因の分析と低減方法</li>
+        <li>異なる条件下での性能評価</li>
+    </ul>
+
+    <h3>6.5 技術習得に関する計画</h3>
+    <ul>
+        <li>関連論文・文献のレビュー</li>
+        <li>Python/Open3Dプログラミングの学習</li>
+        <li>CloudCompare操作の習熟</li>
+        <li>GIS・リモートセンシングの基礎知識習得</li>
+    </ul>
+
+    <hr>
+
+    <h2>📁 付録：プロジェクト構成</h2>
+    <pre><code>Niigata_Research_Prep/
+├── 00_Raw_Data/          # 生LiDARデータ
+├── 01_Processed/         # 処理途中のデータ
+├── 02_Screenshots/       # 操作記録のスクリーンショット
+├── 03_Scripts/           # 試作スクリプト
+├── 04_Results/           # 試行結果
+└── README.md</code></pre>
+
+    <hr>
+
+    <div class="footer">
+        <p><strong>報告書作成日</strong>: 2026年01月29日 | <strong>担当</strong>: zyc | <strong>段階</strong>: 予備調査</p>
+        <p><em>本報告書は学習段階の記録であり、今後の研究に向けた基礎資料として作成しました。</em></p>
+    </div>
+
+</body>
+
+</html>

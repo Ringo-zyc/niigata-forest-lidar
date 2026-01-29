@@ -8,3 +8,4 @@ env/
 *.VSCodeCounter/
 00_Raw_Data/
 01_Processed/
+.venv/

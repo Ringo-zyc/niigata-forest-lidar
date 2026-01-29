@@ -21,127 +21,29 @@ MAX_RADIUS = 0.8          # 最大半径 (m)
 MIN_HEIGHT = 1.0          # 最小高度 (m)
 MAX_ITERATIONS = 100      # 最多检测多少个圆柱体
 
-def fit_cylinder_ransac(points, n_iterations=1000, threshold=0.05):
-    """
-    使用 RANSAC 拟合圆柱体
-    返回: (axis_direction, center_point, radius, inliers)
-    """
-    best_inliers = []
-    best_params = None
-    
-    n_points = len(points)
-    if n_points < 3:
-        return None
-    
-    for _ in range(n_iterations):
-        # 随机选择3个点
-        idx = np.random.choice(n_points, 3, replace=False)
-        sample_points = points[idx]
-        
-        # 使用 PCA 估算圆柱体轴方向
-        pca = PCA(n_components=3)
-        pca.fit(sample_points)
-        axis = pca.components_[0]  # 主方向
-        
-        # 估算圆柱体中心（投影到轴的平面）
-        center = sample_points.mean(axis=0)
-        
-        # 计算每个点到圆柱体轴的距离
-        # 点到轴的距离 = ||(p - center) - ((p - center) · axis) * axis||
-        vectors = points - center
-        projections = np.dot(vectors, axis)[:, np.newaxis] * axis
-        perpendiculars = vectors - projections
-        distances = np.linalg.norm(perpendiculars, axis=1)
-        
-        # 估算半径
-        radius = np.median(distances[distances < threshold])
-        
-        # 找到内点
-        inliers = np.abs(distances - radius) < threshold
-        
-        if inliers.sum() > len(best_inliers):
-            best_inliers = inliers
-            best_params = (axis, center, radius)
-    
-    if len(best_inliers) < MIN_POINTS:
-        return None
-    
-    # 用所有内点重新拟合以获得更好的参数
-    inlier_points = points[best_inliers]
-    pca = PCA(n_components=3)
-    pca.fit(inlier_points)
-    axis = pca.components_[0]
-    center = inlier_points.mean(axis=0)
-    
-    vectors = inlier_points - center
-    projections = np.dot(vectors, axis)[:, np.newaxis] * axis
-    perpendiculars = vectors - projections
-    distances = np.linalg.norm(perpendiculars, axis=1)
-    radius = np.median(distances)
-    
-    # 计算高度
-    heights_along_axis = np.dot(inlier_points - center, axis)
-    height = heights_along_axis.max() - heights_along_axis.min()
-    
-    return {
-        'axis': axis,
-        'center': center,
-        'radius': radius,
-        'height': height,
-        'inliers': best_inliers,
-        'num_points': inliers.sum()
-    }
+# Import shared logic from local module
+import sys
+try:
+    from tree_utils import detect_cylinders
+except ImportError:
+    sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+    from tree_utils import detect_cylinders
 
-def detect_cylinders(pcd):
-    """检测多个圆柱体"""
+def detect_cylinders_wrapper(pcd):
+    """Wrapper to call shared detection with global constants"""
     points = np.asarray(pcd.points)
-    cylinders = []
-    remaining_mask = np.ones(len(points), dtype=bool)
     
-    print(f"点云共有 {len(points)} 个点")
-    print("开始检测圆柱体...\n")
-    
-    for iteration in range(MAX_ITERATIONS):
-        remaining_points = points[remaining_mask]
-        
-        if len(remaining_points) < MIN_POINTS:
-            break
-        
-        # 拟合圆柱体
-        result = fit_cylinder_ransac(remaining_points, n_iterations=500, threshold=DISTANCE_THRESHOLD)
-        
-        if result is None:
-            break
-        
-        # 检查参数是否合理
-        if (MIN_RADIUS <= result['radius'] <= MAX_RADIUS and 
-            result['height'] >= MIN_HEIGHT and
-            result['num_points'] >= MIN_POINTS):
-            
-            cylinders.append({
-                'radius': result['radius'],
-                'diameter': result['radius'] * 2 * 100,  # 转厘米
-                'height': result['height'],
-                'num_points': result['num_points']
-            })
-            
-            print(f"  圆柱体 #{len(cylinders)}: "
-                  f"r={result['radius']:.3f}m, "
-                  f"d={result['radius']*2*100:.1f}cm, "
-                  f"h={result['height']:.2f}m, "
-                  f"{result['num_points']} 点")
-            
-            # 更新 remaining_mask
-            remaining_indices = np.where(remaining_mask)[0]
-            inlier_global_indices = remaining_indices[result['inliers']]
-            remaining_mask[inlier_global_indices] = False
-        else:
-            # 如果检测到的不符合条件，移除一部分点后继续
-            remaining_indices = np.where(remaining_mask)[0]
-            inlier_global_indices = remaining_indices[result['inliers']]
-            remaining_mask[inlier_global_indices] = False
-    
-    return cylinders
+    # Use print as the logging callback
+    return detect_cylinders(
+        points=points,
+        min_points=MIN_POINTS,
+        distance_threshold=DISTANCE_THRESHOLD,
+        min_radius=MIN_RADIUS,
+        max_radius=MAX_RADIUS,
+        min_height=MIN_HEIGHT,
+        max_iterations=MAX_ITERATIONS,
+        log_callback=print
+    )
 
 def save_results(cylinders, output_path):
     """保存结果到 CSV"""
@@ -155,13 +57,16 @@ def save_results(cylinders, output_path):
     
     with open(output_path, 'w', newline='') as f:
         writer = csv.writer(f)
-        writer.writerow(['Radius (m)', 'Diameter_DBH (cm)', 'Height (m)', 'Num_Points'])
+        writer.writerow(['Radius (m)', 'Diameter_DBH (cm)', 'Height (m)', 'Num_Points', 'X', 'Y', 'Z'])
         for cyl in cylinders:
             writer.writerow([
                 f"{cyl['radius']:.4f}",
                 f"{cyl['diameter']:.2f}",
                 f"{cyl['height']:.2f}",
-                cyl['num_points']
+                cyl['num_points'],
+                f"{cyl['center'][0]:.4f}",
+                f"{cyl['center'][1]:.4f}",
+                f"{cyl['center'][2]:.4f}"
             ])
     
     print(f"\n✅ 成功！检测到 {len(cylinders)} 棵树")
@@ -184,7 +89,7 @@ def main():
     print(f"✅ 成功加载 {len(pcd.points)} 个点\n")
     
     # 检测圆柱体
-    cylinders = detect_cylinders(pcd)
+    cylinders = detect_cylinders_wrapper(pcd)
     
     # 保存结果
     save_results(cylinders, OUTPUT_CSV)

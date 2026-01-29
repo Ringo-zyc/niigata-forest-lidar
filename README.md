@@ -1,355 +1,215 @@
-# 新泻研究项目 - 树木点云分析操作手册
+# 🌲 UAV-LiDAR 单木识别与树木信息自动测量
 
-## 📋 项目概述
+<div align="center">
 
-本项目用于从激光雷达（LiDAR）点云数据中提取树木信息，包括胸径（DBH）和树高数据。
+![Version](https://img.shields.io/badge/Version-2.1-green)
+![Python](https://img.shields.io/badge/Python-3.11+-blue)
+![License](https://img.shields.io/badge/License-Academic-orange)
 
-**项目负责人**: zyc  
-**创建日期**: 2026-01-25  
-**数据来源**: 新泻冬季 ULS 点云数据
+**基于无人机载激光雷达点云数据的森林调查自动化工具**
+
+[快速开始](#-快速开始) • [功能特性](#-功能特性) • [项目结构](#-项目结构) • [使用指南](#-使用指南) • [验证工具](#-验证工具)
+
+</div>
 
 ---
 
-## 📁 项目文件结构
+## 📋 项目概述
 
-```
-Niigata_Research_Prep/
-├── 00_Raw_Data/                    # 原始数据
-│   ├── SJFE_final_ULS.laz         # 原始 LiDAR 数据
-│   └── SL_Winter2021_classified_projected_clipped.laz
-│
-├── 01_Processed/                   # 处理后的数据
-│   ├── tree.bin                   # CloudCompare 二进制格式
-│   ├── tree.ply                   # PLY 格式（用于 Python 处理）
-│   └── Niigata_Project_Day1_Done.bin
-│
-├── 02_Screenshots/                 # 操作截图（用于参考）
-│   ├── CSF (布料模拟滤波)算法处理.png
-│   ├── RANSAC设置.png
-│   └── ... (其他截图)
-│
-├── 03_Scripts/                     # 分析脚本
-│   ├── detect_cylinders_v2.py     # 圆柱体检测 + Slenderness 修正
-│   ├── analyze_forest_data.py     # 数据清洗、径阶、生物量
-│   └── visualize_forest.py        # 3D 叠加图 & 空间分布
-│
-├── 04_Results/                     # 分析输出
-│   ├── figures/                   # *.png 图件
-│   ├── tables/                    # CSV/JSON/XLSX 数据表
-│   ├── reports/                   # 文本/报告
-│   └── geometry/                  # BIN/PLY 等 3D 导出
-│
-├── docs/                           # 学习手册（PROJECT_STRUCTURE.md 等）
-├── run_tree_detection.sh           # 主运行脚本
-├── run_forest_analysis.sh          # 生物量分析脚本
-└── README.md                       # 本文档
-```
+本项目实现了从原始 LiDAR 点云到单木参数提取的完整流程，支持：
+- 🌳 **单木检测**: 基于 RANSAC 圆柱拟合的树干识别
+- 📏 **DBH 提取**: 胸径（Diameter at Breast Height）自动测量
+- 📍 **空间定位**: 每棵树的 UTM 坐标输出
+- 📊 **可视化**: 2D 分布图 + 3D 叠加图 + 交互式预览
+- ✅ **验证工具**: 分层抽样 + RMSE 统计
+
+**研究方向**: UAV搭載レーザ（RCヘリ含む）点群データによる単木識別と樹木情報の自動計測
 
 ---
 
 ## 🚀 快速开始
 
-### 运行树木检测
-
-直接运行主脚本即可：
-
 ```bash
+# 1. 进入项目目录
 cd /Users/zyc/Downloads/Niigata_Research_Prep
-./run_tree_detection.sh
-```
 
-或者：
+# 2. 启动 GUI（推荐）
+./03_Scripts/run.sh
 
-```bash
-bash /Users/zyc/Downloads/Niigata_Research_Prep/run_tree_detection.sh
-```
-
-**输出结果**：`04_Results/tables/tree_cylinders.csv`
-
----
-
-## 📊 完整操作流程
-
-### 第一步：数据预处理（CloudCompare）
-
-#### 1.1 打开原始数据
-
-1. 启动 CloudCompare
-2. 文件 → 打开 → 选择 `00_Raw_Data/*.laz` 文件
-3. 设置 Global Shift/Scale（如果提示）
-
-#### 1.2 地面点滤波（CSF 算法）
-
-1. 选择点云
-2. 插件 → CSF Filter（布料模拟滤波）
-3. 参数设置：
-   - Cloth resolution: 1.0
-   - Max iterations: 500
-   - Classification threshold: 0.5
-4. 运行后会生成：
-   - Ground points（地面点）
-   - Off-ground points（非地面点 = 树木）
-
-#### 1.3 提取目标树木
-
-**方法 1：使用 Segment（分割工具）**
-1. 工具 → Segmentation → Segment
-2. 在 3D 视图中框选目标区域
-3. 确认选择后导出
-
-**方法 2：使用 Clipping Box（裁剪盒）**
-1. 工具 → Clipping Box
-2. 调整裁剪盒大小和位置
-3. 提取内部点云
-
-#### 1.4 切片处理
-
-1. 工具 → Segmentation → Cross Section（Slice）
-2. 设置切片参数：
-   - 厚度：根据需要调整
-   - 方向：通常为 Z 轴（垂直）
-3. 导出切片结果
-
-#### 1.5 保存处理后的数据
-
-```bash
-文件 → 保存 → 选择格式：
-- .bin (CloudCompare 原生格式)
-- .ply (用于 Python 处理)
-```
-
-保存位置：`01_Processed/tree.bin` 和 `tree.ply`
-
----
-
-### 第二步：圆柱体检测（自动化）
-
-#### 2.1 环境要求
-
-- **Python**: 3.11（通过 conda 管理）
-- **必需库**: 
-  - open3d
-  - numpy
-  - scipy
-  - scikit-learn
-
-#### 2.2 首次运行设置
-
-脚本会自动：
-1. 创建 conda 环境（名称：`tree_detection`）
-2. 安装所需依赖
-3. 转换 .bin 文件为 .ply 格式
-4. 运行圆柱体检测
-
-#### 2.3 运行检测
-
-```bash
-cd /Users/zyc/Downloads/Niigata_Research_Prep
-./run_tree_detection.sh
-```
-
-#### 2.4 参数调整（如需）
-
-编辑 `03_Scripts/detect_cylinders_v2.py`：
-
-```python
-# RANSAC 参数
-DISTANCE_THRESHOLD = 0.06  # 点到圆柱体的最大距离
-MIN_POINTS = 50           # 一个圆柱体的最少点数
-MIN_RADIUS = 0.03         # 最小半径 (m) - 3cm
-MAX_RADIUS = 0.8          # 最大半径 (m) - 80cm
-MIN_HEIGHT = 1.0          # 最小高度 (m) - 1m
-MAX_ITERATIONS = 100      # 最多检测圆柱体数量
+# 3. 在 GUI 中:
+#    - 选择输入点云 (.ply)
+#    - 调整参数（或使用默认值）
+#    - 点击 "开始检测"
 ```
 
 ---
 
-## 📈 结果说明
+## ✨ 功能特性
 
-### 输出文件：`04_Results/tables/tree_cylinders.csv`
-
-**列说明**：
-
-| 列名 | 说明 | 单位 |
+| 功能 | 描述 | 工具 |
 |------|------|------|
-| Radius (m) | 树干半径 | 米 |
-| Diameter_DBH (cm) | 胸径（DBH，Diameter at Breast Height） | 厘米 |
-| Height (m) | 树高 | 米 |
-| Num_Points | 该树的点云数量 | 个 |
-
-**示例数据**：
-
-```csv
-Radius (m),Diameter_DBH (cm),Height (m),Num_Points
-0.0785,15.70,30.52,167
-0.0783,15.67,37.14,86
-0.0765,15.31,31.98,87
-```
-
-**数据排序**：按直径（DBH）从大到小排列
+| **GUI 交互界面** | 分页设计，检测+可视化一体 | `gui_app.py` |
+| **命令行检测** | 批量处理，无需界面 | `detect_cylinders_v2.py` |
+| **3D 可视化** | Matplotlib 静态图 + Open3D 交互 | `visualize_forest.py` |
+| **精度验证** | 分层抽样 + RMSE/MAE 计算 | `generate_validation_sample.py` |
+| **生物量分析** | 径阶分布、碳储量估算 | `analyze_forest_data.py` |
 
 ---
 
-## 🛠️ 技术细节
+## 📁 项目结构
 
-### CloudCompare 命令行使用
+```
+Niigata_Research_Prep/
+├── 00_Raw_Data/                    # 原始 LiDAR 数据 (.laz)
+│   ├── SJFE_final_ULS.laz         # San Juan Fault (1.1GB)
+│   └── SL_Winter2021_*.laz        # StREAM Lab (473MB)
+│
+├── 01_Processed/                   # 预处理后的点云
+│   ├── San Juan Fault/            # 主要研究区域
+│   │   ├── Off-Ground_Good-5m.ply # 非地面点（处理后）
+│   │   └── *_cylinders.csv        # 检测结果 (250棵树)
+│   └── StREAM Lab/                # 辅助验证区域
+│
+├── 03_Scripts/                     # 🐍 核心脚本
+│   ├── run.sh                     # 统一入口
+│   ├── gui_app.py                 # GUI 主程序
+│   ├── tree_utils.py              # RANSAC 算法核心
+│   ├── detect_cylinders_v2.py     # CLI 检测
+│   ├── visualize_forest.py        # 可视化生成
+│   ├── generate_validation_sample.py  # 验证抽样
+│   ├── calculate_validation_stats.py  # RMSE 计算
+│   └── MANUAL.md                  # 中文使用手册
+│
+├── 04_Results/                     # 输出结果
+│   ├── figures/                   # 图件 (.png)
+│   └── tables/                    # 数据表 (.csv)
+│
+└── README.md                       # 本文档
+```
 
-#### 基本命令格式
+---
+
+## 🔧 使用指南
+
+### 方式一：GUI 界面（推荐）
 
 ```bash
-/Applications/CloudCompare.app/Contents/MacOS/CloudCompare \
-    -SILENT \                    # 静默模式
-    -O "input.bin" \             # 打开文件
-    -NO_TIMESTAMP \              # 不添加时间戳
-    -RANSAC \                    # 运行 RANSAC
-    -C_EXPORT_FMT PLY \          # 导出格式
-    -SAVE_CLOUDS FILE "output.ply"
+./03_Scripts/run.sh
 ```
 
-#### 重要说明
+**🌲 检测标签页**:
+1. 选择输入点云文件 (`.ply`)
+2. 设置输出 CSV 路径
+3. 调整 RANSAC 参数（可选）
+4. 点击 "开始检测"
+5. 勾选 "自动可视化" 可在完成后自动生成图像
 
-❌ **不支持的参数**（命令行模式）：
-- `-EPS`、`-BITMAP_EPS`、`-SUPPORT`、`-PROB`
-- `-OUT_CLOUD_DIR`（输出总是在输入文件同目录）
+**🎨 可视化标签页**:
+1. 选择点云和结果目录
+2. 点击 "生成可视化图表"
+3. 点击 "交互式 3D 预览" 打开 Open3D 窗口
 
-✅ **支持的功能**：
-- `-RANSAC`：RANSAC 形状检测
-- `-CSF`：地面滤波
-- `-C_EXPORT_FMT`：格式转换
+### 方式二：命令行
 
-### Python 圆柱体检测算法
+```bash
+# 检测
+python 03_Scripts/detect_cylinders_v2.py
 
-#### 算法原理
-
-1. **RANSAC 拟合**：
-   - 随机采样 3 个点
-   - 使用 PCA 估算圆柱体轴方向
-   - 计算点到轴的距离
-   - 估算半径和高度
-
-2. **迭代检测**：
-   - 检测一个圆柱体后移除对应点
-   - 继续检测下一个圆柱体
-   - 重复直到无法检测或达到上限
-
-3. **参数过滤**：
-   - 半径范围：3-80 cm
-   - 最小高度：1 m
-   - 最少点数：50 个
-
-#### 算法优化建议
-
-1. **提高精度**：
-   - 增加 `n_iterations`（RANSAC 迭代次数）
-   - 减小 `DISTANCE_THRESHOLD`
-
-2. **检测更多树**：
-   - 减小 `MIN_POINTS`
-   - 增加 `MAX_ITERATIONS`
-
-3. **过滤小树**：
-   - 增大 `MIN_RADIUS`
-   - 增大 `MIN_HEIGHT`
-
----
-
-## 🔧 故障排除
-
-### 问题 1: Open3D 安装失败
-
-**错误信息**：
-```
-ERROR: Could not find a version that satisfies the requirement open3d
+# 可视化
+python 03_Scripts/visualize_forest.py <path_to_ply>
 ```
 
-**原因**: Python 3.14 不支持 Open3D
+---
 
-**解决方案**：
-脚本会自动创建 Python 3.11 的 conda 环境，无需手动处理。
+## ⚙️ 参数说明
+
+| 参数 | 默认值 | 说明 |
+|------|--------|------|
+| Distance Threshold | 0.06 m | 点到圆柱轴的最大距离 |
+| Min Points | 50 | 一个圆柱体最少点数 |
+| Min Radius | 0.03 m | 最小半径 (3 cm) |
+| Max Radius | 0.8 m | 最大半径 (80 cm) |
+| Min Height | 1.0 m | 最小高度 |
+| Max Iterations | 100 | 最多检测树木数量 |
 
 ---
 
-### 问题 2: 未检测到圆柱体
+## ✅ 验证工具
 
-**可能原因**：
-1. 点云质量不足
-2. 参数设置过严格
-3. 数据预处理不当
+### 1. 生成分层抽样验证表
 
-**解决方案**：
-1. 检查输入点云文件是否正确
-2. 调整检测参数（见上文"参数调整"）
-3. 确认数据预处理步骤正确
+```bash
+python 03_Scripts/generate_validation_sample.py
+```
 
----
+输出: `validation_sample.csv`（按 DBH 大小分层抽取 9 棵树）
 
-### 问题 3: 检测结果不准确
+### 2. 在 CloudCompare 中验证
 
-**优化方法**：
+使用坐标定位每棵树，手动测量直径，填入 `Manual_DBH_cm` 列
 
-1. **增加点云密度**：
-   - 在 CloudCompare 中减小切片厚度
-   - 使用更高分辨率的原始数据
+### 3. 计算误差统计
 
-2. **调整 RANSAC 参数**：
-   ```python
-   DISTANCE_THRESHOLD = 0.04  # 降低容差
-   MIN_POINTS = 100           # 增加最小点数
-   ```
+```bash
+python 03_Scripts/calculate_validation_stats.py
+```
 
-3. **手动验证**：
-   - 在 CloudCompare 中打开结果文件
-   - 可视化检查检测的圆柱体
+输出: RMSE, MAE, 平均误差等指标
 
 ---
 
-## 📚 参考资料
+## 📊 输出格式
 
-### CloudCompare 相关
+### CSV 文件列说明
 
-- 官方文档: https://www.cloudcompare.org/doc/
-- 命令行文档: https://www.cloudcompare.org/doc/wiki/index.php/Command_line_mode
-- CSF 算法论文: Zhang et al. (2016)
-
-### Python 库文档
-
-- Open3D: http://www.open3d.org/docs/
-- NumPy: https://numpy.org/doc/
-- scikit-learn: https://scikit-learn.org/
-
-### RANSAC 算法
-
-- 原理介绍: https://en.wikipedia.org/wiki/Random_sample_consensus
-- 圆柱体拟合: Schnabel et al. (2007)
+| 列名 | 单位 | 说明 |
+|------|------|------|
+| Radius (m) | 米 | 树干半径 |
+| Diameter_DBH (cm) | 厘米 | 胸径 |
+| Height (m) | 米 | 拟合高度（注：受限于点云密度，可能偏高）|
+| Num_Points | 个 | 点云数量 |
+| X, Y, Z | 米 | UTM 坐标 |
 
 ---
 
-## 📝 版本历史
+## ⚠️ 已知限制
 
-### v2.0 (2026-01-25)
-- ✅ 实现自动化圆柱体检测
-- ✅ 使用 Python + Open3D + RANSAC
-- ✅ 成功检测 61 棵树
-- ✅ 输出标准 CSV 格式
-
-### v1.0 (初始版本)
-- ❌ 尝试使用 CloudCompare 命令行
-- ❌ 发现不支持圆柱体参数自定义
-- ✅ 完成数据预处理流程
+| 问题 | 原因 | 建议解决方案 |
+|------|------|--------------|
+| 高度值异常 | 稀疏点云导致 RANSAC 拟合偏差 | 使用 CHM（冠层高度模型）替代 |
+| 需要手动预处理 | CloudCompare 切片/滤波 | 未来集成自动化流程 |
+| 内存占用大 | 大型点云加载 | 分块处理 |
 
 ---
 
-## 👥 联系方式
+## 📚 技术栈
 
-如有问题或建议，请联系项目负责人。
+- **点云处理**: Open3D, CloudCompare
+- **算法**: RANSAC, PCA (scikit-learn)
+- **可视化**: Matplotlib, Open3D
+- **界面**: Tkinter
+- **数据分析**: Pandas, NumPy
+
+---
+
+## 📈 版本历史
+
+| 版本 | 日期 | 更新内容 |
+|------|------|----------|
+| v2.1 | 2026-01-27 | 分页 GUI、验证工具、3D 预览、显示高度截断 |
+| v2.0 | 2026-01-25 | RANSAC 检测、基础 GUI |
+| v1.0 | 初始 | CloudCompare 手动流程 |
+
+---
+
+## 👤 项目信息
+
+- **创建者**: zyc
+- **研究方向**: 森林 UAV LiDAR 单木识别
+- **最后更新**: 2026-01-27
 
 ---
 
 ## 📄 许可证
 
 本项目仅供学术研究使用。
-
----
-
-**最后更新**: 2026-01-25  
-**文档版本**: 1.0
