@@ -146,17 +146,23 @@
 
 ```
 Niigata_Research_Prep/
-├── 00_Raw_Data/           # 原始 LiDAR 数据
-├── 01_Processed/          # 处理后点云
-├── 02_Screenshots/        # 学习过程截图
-│   └── failures/          # 失败案例记录 ← NEW
-├── 03_Scripts/            # Python 脚本
-│   └── MANUAL.md          # 工具手册
-├── 04_Results/            # 输出结果
-│   └── reports/           # 规划文档
-└── docs/                  # 项目文档
-    ├── research_master_guideline.md   # 本文件
-    └── research_master_guideline.html # HTML 版本
+├── 00_Raw_Data/                    # 原始 LiDAR 数据
+├── 01_Processed/                   # 处理后点云
+├── 02_Screenshots/                 # 学习过程截图
+│   └── failures/                   # 失败案例记录 (New)
+├── 03_Scripts/                     # Python 脚本
+│   ├── run.sh                      # 统一运行脚本
+│   └── MANUAL.md                   # 工具使用手册
+├── 04_Results/                     # 输出结果
+│   ├── reports/                    # 规划文档
+│   │   ├── path_ab_learning_plan.html      # 详细学习方案
+│   │   ├── iti_learning_summary.md         # 短期学习总结
+│   │   └── graduate_career_roadmap.html    # 两年职业规划
+│   ├── figures/                    # 图表
+│   └── tables/                     # CSV 数据表
+└── docs/                           # 项目文档
+    ├── research_master_guideline.md    # 本文件
+    └── research_master_guideline.html  # 总纲领 (HTML)
 ```
 
 ---
@@ -165,11 +171,11 @@ Niigata_Research_Prep/
 
 | 文档 | 内容 | 格式 |
 |-----|------|-----|
-| [path_ab_learning_plan.html](file:///Users/zyc/Downloads/Niigata_Research_Prep/04_Results/reports/path_ab_learning_plan.html) | 深度学习 + 边缘部署详细方案 | HTML |
-| [iti_learning_summary.md](file:///Users/zyc/Downloads/Niigata_Research_Prep/04_Results/reports/iti_learning_summary.md) | 5-6 天短期学习计划 | MD |
-| [graduate_career_roadmap.html](file:///Users/zyc/Downloads/Niigata_Research_Prep/04_Results/reports/graduate_career_roadmap.html) | 两年规划时间轴 | HTML |
-| [MANUAL.md](file:///Users/zyc/Downloads/Niigata_Research_Prep/03_Scripts/MANUAL.md) | 工具使用手册 | MD |
-| [career_skill_mapping.md](file:///Users/zyc/Downloads/Niigata_Research_Prep/docs/career_skill_mapping.md) | 技能-职业关联图 | MD |
+| [path_ab_learning_plan.html](../04_Results/reports/path_ab_learning_plan.html) | 深度学习 + 边缘部署详细方案 | HTML |
+| [iti_learning_summary.md](../04_Results/reports/iti_learning_summary.md) | 5-6 天短期学习计划 | MD |
+| [graduate_career_roadmap.html](../04_Results/reports/graduate_career_roadmap.html) | 两年规划时间轴 | HTML |
+| [MANUAL.md](../03_Scripts/MANUAL.md) | 工具使用手册 | MD |
+| [career_skill_mapping.md](career_skill_mapping.md) | 技能-职业关联图 | MD |
 
 ---
 
