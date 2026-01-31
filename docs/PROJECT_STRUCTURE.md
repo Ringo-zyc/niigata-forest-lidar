@@ -1,62 +1,105 @@
-# Project Structure & Naming Guide
+# 项目结构与文件导航
 
-## 1. Top-level layout
+> **更新日期**: 2026-01-30
+> **用途**: 帮助你快速找到需要的文件
+
+---
+
+## 📁 目录树
 
 ```
 Niigata_Research_Prep/
-├── 00_Raw_Data/          # 原始 LiDAR / 任何外部输入（只读备份）
-├── 01_Processed/         # CloudCompare / Python 预处理产物
-├── 02_Screenshots/       # 截图、参考素材（png/jpg，命名见 2.2）
-├── 03_Scripts/           # 代码（仅 Python）；命名：verb_context.py
-├── 04_Results/
-│   ├── figures/          # 所有 PNG/JPG 图件
-│   ├── tables/           # CSV / JSON / XLSX 等数据表
-│   ├── reports/          # TXT / PDF / DOCX 报告
-│   └── geometry/         # BIN / PLY / LAS 等 3D 导出
-├── docs/                 # 手册、学习资料、结构指南
-├── run_tree_detection.sh # 核心一键脚本
-└── run_forest_analysis.sh
+│
+├── 📂 00_Raw_Data/                    # 原始 LiDAR 数据 (只读)
+│   ├── SJFE_final_ULS.laz            # San Juan Fault 原始数据 (1.1GB)
+│   └── SL_Winter2021_*.laz           # StREAM Lab 原始数据 (473MB)
+│
+├── 📂 01_Processed/                   # 处理后的点云
+│   ├── San Juan Fault/
+│   │   ├── Off-Ground_Good-5m.ply    # ⭐ 主要练习数据
+│   │   ├── Off-Ground_Good-5m_cylinders.csv  # RANSAC 结果
+│   │   └── isolated_trees_dbscan/    # [新] ITI 分离结果
+│   └── StREAM Lab/
+│       └── tree.ply                  # 验证数据
+│
+├── 📂 02_Screenshots/                 # 截图存放处
+│   └── [按 dayX_主题_细节.png 命名]
+│
+├── 📂 03_Scripts/                     # Python 脚本
+│   │
+│   │ -- 原有脚本 --
+│   ├── tree_utils.py                 # RANSAC 核心算法
+│   ├── detect_cylinders_v2.py        # 树干检测
+│   ├── gui_app.py                    # GUI 程序
+│   ├── visualize_forest.py           # 可视化
+│   │
+│   │ -- 新增 ITI 脚本 --
+│   ├── tree_isolation_dbscan.py      # ⭐ DBSCAN 单木分离
+│   ├── measure_isolated_tree.py      # DBH 测量
+│   ├── run_dbscan_experiments.py     # 参数网格搜索
+│   ├── full_iti_pipeline.py          # ⭐ 完整流程
+│   ├── compare_iti_ransac.py         # 方法对比
+│   └── treeiso_wrapper.py            # Treeiso 封装
+│
+├── 📂 04_Results/                     # 输出结果
+│   ├── figures/                      # 图表
+│   ├── tables/                       # CSV 数据表
+│   │   ├── dbscan_experiments.csv    # [新] 参数实验
+│   │   └── isolated_trees_dbh.csv    # [新] DBH 测量
+│   ├── reports/                      # ⭐ 报告文档
+│   │   ├── task_checklist.md         # 任务清单 (每日打勾)
+│   │   ├── iti_learning_summary.md   # 学习总结
+│   │   ├── learning_diary.md         # 学习日记
+│   │   └── comparison_notes.md       # [待创建] 对比分析
+│   └── iti_pipeline_output/          # [新] Pipeline 输出
+│
+├── 📂 docs/                           # 项目文档
+│   ├── algorithm_principles.md       # ⭐ 算法原理手册
+│   ├── career_skill_mapping.md       # 技能-职业关联
+│   ├── daily_workflow.md             # 每日工作流
+│   └── PROJECT_STRUCTURE.md          # 本文件
+│
+├── README.md                         # 项目说明
+├── QUICKSTART.md                     # 快速开始
+└── OPERATION_SUMMARY.md              # 操作历史
 ```
 
-> 约定：`0x_` 前缀保留给数据阶段；`docs/`、`run_*.sh` 为跨阶段工具。若未来新增阶段，继续沿用 `05_Modeling`, `06_Reports` 等递增编码。
+---
 
-## 2. 命名规范
+## ⭐ 重要文件快速索引
 
-### 2.1 数据 / 表格
-- 统一小写 + 下划线：`tree_positions.csv`, `forest_analysis_data.json`
-- 结构：`subject_detail_version.ext`
-  - `subject`: tree / forest / plot 等
-  - `detail`: positions / cylinders / analysis
-  - `version`: 可选，使用 `v1`, `20260125`, `draft`
-- 中间成果留在 `01_Processed`，命名保留来源：`tree_cloud_slice1.ply`
+| 场景 | 文件 |
+|------|------|
+| 每天开始前看 | `docs/algorithm_principles.md` |
+| 查看今日任务 | `04_Results/reports/task_checklist.md` |
+| 运行主程序 | `03_Scripts/full_iti_pipeline.py` |
+| 记录学习进度 | `04_Results/reports/learning_diary.md` |
+| 技能与久保田关联 | `docs/career_skill_mapping.md` |
 
-### 2.2 图像 / 3D
-- 图像：`context_view_modifier.png`，例如 `forest_pointcloud_cylinders.png`
-- 截图放入 `02_Screenshots/`，命名：`step_tool_desc.png`
-- 几何导出放 `04_Results/geometry/`，命名：`plotname_artifact.ext`
+---
 
-### 2.3 脚本 / 批处理
-- Python：`verb_subject.py`（`analyze_forest_data.py`、`visualize_forest.py`）
-- Shell：`run_*` 前缀表明入口；如果脚本仅用于一次性任务，放在 `scripts/archive/`
-- 常量路径统一在脚本顶部定义 `PROJECT_DIR`，避免硬编码
+## 🚀 常用命令
 
-## 3. 操作流程模板
+```bash
+# 进入项目
+cd /Users/zyc/Downloads/Niigata_Research_Prep
 
-1. **原始数据** → 放入 `00_Raw_Data/YYMMDD_dataset/`
-2. **预处理** → 结果存 `01_Processed/<task>/`
-3. **脚本** → 写在 `03_Scripts/`，同时更新 `docs/CHANGELOG.md`
-4. **分析输出**  
-   - 图：`04_Results/figures/`  
-   - 表：`04_Results/tables/`  
-   - 报告：`04_Results/reports/`  
-   - 3D：`04_Results/geometry/`
-5. **文档** → 所有指南、新学习手册放入 `docs/`
+# 激活环境
+source .venv/bin/activate
 
-## 4. 文件添加 checklist
+# 运行 DBSCAN 分割
+python 03_Scripts/tree_isolation_dbscan.py
 
-- [ ] 目录是否匹配阶段？（数据→00/01，代码→03，输出→04）
-- [ ] 文件名是否使用英文、下划线、无空格？
-- [ ] 是否更新 `docs/PROJECT_STRUCTURE.md` 或 README 说明？
-- [ ] 如有新依赖，是否在 `run_*.sh` 或 README 中记录？
+# 运行完整流程
+python 03_Scripts/full_iti_pipeline.py
 
-> 按上述结构整理其它项目时，只需复制该目录模板并替换数据/脚本即可，避免命名混乱。
+# 参数实验
+python 03_Scripts/run_dbscan_experiments.py
+
+# 方法对比
+python 03_Scripts/compare_iti_ransac.py
+```
+
+---
+
+*文件有问题？随时问我*

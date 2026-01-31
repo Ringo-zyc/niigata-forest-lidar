@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新潟森林 LiDAR 研究纲领</title>
+    <style>
+        :root {
+            --primary: #2d5a27;
+            --secondary: #1a5f7a;
+            --accent: #e67e22;
+            --bg: #f8f9fa;
+            --card: #ffffff;
+            --text: #2c3e50;
+            --text-light: #7f8c8d;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans SC', 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, #1a3a17 50%, var(--secondary) 100%);
+            color: white;
+            padding: 50px 20px;
+            text-align: center;
+            border-radius: 0 0 30px 30px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        header h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+        }
+
+        header .subtitle {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        /* Tab Navigation */
+        .tab-nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            background: var(--card);
+            padding: 15px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            position: sticky;
+            top: 0;
+            z-index: 99;
+        }
+
+        .tab-btn {
+            flex: 1;
+            min-width: 120px;
+            padding: 12px 20px;
+            background: var(--bg);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 500;
+            color: var(--text);
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn:hover {
+            background: linear-gradient(135deg, rgba(45, 90, 39, 0.1), rgba(26, 95, 122, 0.1));
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section {
+            background: var(--card);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .section h2 {
+            color: var(--primary);
+            border-left: 4px solid var(--secondary);
+            padding-left: 15px;
+            margin-bottom: 20px;
+            font-size: 1.4em;
+        }
+
+        .section h3 {
+            color: var(--secondary);
+            margin: 20px 0 10px 0;
+            font-size: 1.1em;
+        }
+
+        /* Vision Flow */
+        .vision-flow {
+            background: linear-gradient(135deg, #e8f4e8, #e8f4f8);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .vision-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .vision-box {
+            flex: 1;
+            min-width: 200px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .vision-box.forest {
+            border-top: 4px solid var(--primary);
+        }
+
+        .vision-box.kubota {
+            border-top: 4px solid var(--accent);
+        }
+
+        .vision-box h4 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .vision-box.kubota h4 {
+            color: var(--accent);
+        }
+
+        .arrow-big {
+            font-size: 2.5em;
+            color: var(--secondary);
+        }
+
+        /* Roadmap */
+        .roadmap-visual {
+            padding: 20px 0;
+        }
+
+        .phase-row {
+            display: flex;
+            justify-content: center;
+            align-items: stretch;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .phase-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            min-width: 180px;
+            max-width: 220px;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+            flex: 1;
+        }
+
+        .phase-card.phase-0 {
+            border-top: 4px solid #95a5a6;
+        }
+
+        .phase-card.phase-1 {
+            border-top: 4px solid #3498db;
+        }
+
+        .phase-card.phase-2 {
+            border-top: 4px solid #9b59b6;
+        }
+
+        .phase-card.phase-3 {
+            border-top: 4px solid var(--success);
+            max-width: 350px;
+        }
+
+        .phase-card.phase-final {
+            border-top: 4px solid var(--accent);
+            max-width: 300px;
+            text-align: center;
+            background: linear-gradient(135deg, #fff9e6, #fff3cc);
+        }
+
+        .phase-number {
+            position: absolute;
+            top: -12px;
+            left: 15px;
+            background: var(--secondary);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .phase-card.phase-0 .phase-number {
+            background: #95a5a6;
+        }
+
+        .phase-card.phase-1 .phase-number {
+            background: #3498db;
+        }
+
+        .phase-card.phase-2 .phase-number {
+            background: #9b59b6;
+        }
+
+        .phase-card.phase-3 .phase-number {
+            background: var(--success);
+        }
+
+        .phase-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .phase-card.phase-final .phase-title {
+            color: var(--accent);
+            font-size: 1.2em;
+        }
+
+        .phase-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .phase-subtitle {
+            color: var(--text-light);
+            font-size: 0.9em;
+        }
+
+        .phase-items {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .phase-items li {
+            padding: 4px 0;
+            font-size: 0.9em;
+            color: var(--text-light);
+            border-bottom: 1px dashed #eee;
+        }
+
+        .phase-items li:last-child {
+            border-bottom: none;
+        }
+
+        .phase-items.horizontal {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .phase-items.horizontal li {
+            border-bottom: none;
+            border-right: 1px solid #ddd;
+            padding-right: 15px;
+        }
+
+        .phase-items.horizontal li:last-child {
+            border-right: none;
+            padding-right: 0;
+        }
+
+        .phase-arrow {
+            font-size: 1.8em;
+            color: var(--secondary);
+            display: flex;
+            align-items: center;
+        }
+
+        .phase-connector {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px 0;
+        }
+
+        .connector-line {
+            width: 3px;
+            height: 20px;
+            background: linear-gradient(to bottom, var(--secondary), var(--accent));
+        }
+
+        .connector-arrow {
+            font-size: 1.5em;
+            color: var(--accent);
+        }
+
+        /* Metrics */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .metric-card {
+            background: linear-gradient(135deg, rgba(45, 90, 39, 0.1), transparent);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid rgba(45, 90, 39, 0.2);
+        }
+
+        .metric-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .metric-label {
+            font-size: 0.85em;
+            color: var(--text-light);
+            margin-top: 5px;
+        }
+
+        /* Compare */
+        .compare-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .compare-box {
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .compare-box.traditional {
+            background: linear-gradient(135deg, #e8f4e8, #d4edda);
+            border: 2px solid var(--primary);
+        }
+
+        .compare-box.innovation {
+            background: linear-gradient(135deg, #e8f0f8, #d4e5f7);
+            border: 2px solid var(--secondary);
+        }
+
+        .compare-box h4 {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .compare-box.traditional h4 {
+            color: var(--primary);
+        }
+
+        .compare-box.innovation h4 {
+            color: var(--secondary);
+        }
+
+        .compare-box ul {
+            padding-left: 20px;
+        }
+
+        .compare-box li {
+            margin: 8px 0;
+            font-size: 0.95em;
+        }
+
+        .preserve-tag,
+        .new-tag {
+            display: inline-block;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.75em;
+            margin-left: 5px;
+        }
+
+        .preserve-tag {
+            background: var(--success);
+        }
+
+        .new-tag {
+            background: var(--secondary);
+        }
+
+        /* Timeline */
+        .timeline-compact {
+            display: grid;
+            gap: 12px;
+        }
+
+        .timeline-row {
+            display: grid;
+            grid-template-columns: 90px 120px 1fr;
+            gap: 15px;
+            padding: 12px 15px;
+            background: var(--bg);
+            border-radius: 10px;
+            border-left: 4px solid var(--secondary);
+            align-items: center;
+        }
+
+        .timeline-row.highlight {
+            border-left-color: var(--accent);
+            background: linear-gradient(135deg, rgba(230, 126, 34, 0.1), transparent);
+        }
+
+        .timeline-date {
+            font-weight: bold;
+            color: var(--secondary);
+            font-size: 0.85em;
+        }
+
+        .timeline-phase {
+            font-weight: 600;
+        }
+
+        .timeline-task {
+            color: var(--text-light);
+            font-size: 0.9em;
+        }
+
+        /* Insights */
+        .insight-box {
+            background: linear-gradient(135deg, #fff9e6, #fff3cc);
+            border-left: 4px solid var(--warning);
+            padding: 20px;
+            border-radius: 0 12px 12px 0;
+            margin: 15px 0;
+        }
+
+        .insight-box h4 {
+            color: var(--warning);
+            margin-bottom: 10px;
+        }
+
+        .insight-box blockquote {
+            font-style: italic;
+            border-left: 2px solid var(--text-light);
+            padding-left: 15px;
+            margin: 10px 0;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        th {
+            background: var(--bg);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        /* Folder Tree */
+        .folder-tree {
+            background: var(--bg);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .folder-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .folder-item:last-child {
+            border-bottom: none;
+        }
+
+        .folder-item.level-0 {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 12px;
+            margin-bottom: 8px;
+        }
+
+        .folder-item.level-1 {
+            padding-left: 20px;
+        }
+
+        .folder-item.level-2 {
+            padding-left: 45px;
+        }
+
+        .folder-item.level-3 {
+            padding-left: 70px;
+        }
+
+        .folder-icon {
+            margin-right: 10px;
+            font-size: 1.1em;
+        }
+
+        .folder-name {
+            font-weight: 500;
+        }
+
+        .folder-desc {
+            color: var(--text-light);
+            font-size: 0.9em;
+            margin-left: 10px;
+        }
+
+        .folder-new {
+            background: var(--success);
+            color: white;
+            padding: 1px 8px;
+            border-radius: 8px;
+            font-size: 0.7em;
+            margin-left: 8px;
+        }
+
+        /* Code Block */
+        .code-block {
+            background: #1e3a5f;
+            color: #a8d8ea;
+            padding: 15px 20px;
+            border-radius: 10px;
+            font-family: 'SF Mono', 'Consolas', monospace;
+            font-size: 0.85em;
+            overflow-x: auto;
+            white-space: pre;
+            line-height: 1.5;
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-light);
+        }
+
+        footer .motto {
+            font-size: 1.1em;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+
+            .vision-row,
+            .phase-row {
+                flex-direction: column;
+            }
+
+            .arrow-big,
+            .phase-arrow {
+                transform: rotate(90deg);
+            }
+
+            .timeline-row {
+                grid-template-columns: 1fr;
+            }
+
+            .compare-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tab-btn {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>🌲 新潟森林 LiDAR 研究纲领 🚜</h1>
+        <p class="subtitle">从森林点云到农机自动驾驶的战略路线图</p>
+    </header>
+
+    <div class="container">
+        <!-- Tab Navigation -->
+        <nav class="tab-nav">
+            <button class="tab-btn active" data-tab="overview">📋 总览</button>
+            <button class="tab-btn" data-tab="research">🔬 研究方向</button>
+            <button class="tab-btn" data-tab="timeline">📅 时间规划</button>
+            <button class="tab-btn" data-tab="learning">📚 短期学习</button>
+            <button class="tab-btn" data-tab="skills">🔗 技能映射</button>
+            <button class="tab-btn" data-tab="tools">🔧 工具手册</button>
+        </nav>
+
+        <!-- ==================== TAB 1: 总览 ==================== -->
+        <div id="overview" class="tab-content active">
+            <section class="section">
+                <h2>🎯 愿景与核心目标</h2>
+                <div class="vision-flow">
+                    <div class="vision-row">
+                        <div class="vision-box forest">
+                            <h4>🌲 森林 LiDAR 研究</h4>
+                            <p>单木分离算法<br>参数测量技术<br>深度学习分割<br>边缘部署优化</p>
+                        </div>
+                        <div class="arrow-big">→</div>
+                        <div class="vision-box kubota">
+                            <h4>🚜 久保田自动驾驶</h4>
+                            <p>障碍物检测<br>距离估算<br>3D 感知模型<br>实时处理</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-value">2-3</div>
+                        <div class="metric-label">篇论文</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">久保田</div>
+                        <div class="metric-label">目标企业</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">2028.04</div>
+                        <div class="metric-label">入社时间</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">A+B</div>
+                        <div class="metric-label">技术路径</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section">
+                <h2>🗺️ 技术路线图</h2>
+                <div class="roadmap-visual">
+                    <div class="phase-row">
+                        <div class="phase-card phase-0">
+                            <div class="phase-number">0</div>
+                            <div class="phase-title">传统方法</div>
+                            <ul class="phase-items">
+                                <li>RANSAC 圆柱拟合</li>
+                                <li>DBSCAN 聚类</li>
+                                <li>CloudCompare</li>
+                            </ul>
+                        </div>
+                        <div class="phase-arrow">→</div>
+                        <div class="phase-card phase-1">
+                            <div class="phase-number">1</div>
+                            <div class="phase-title">数据工程</div>
+                            <ul class="phase-items">
+                                <li>半自动标注</li>
+                                <li>数据集构建</li>
+                                <li>质量控制</li>
+                            </ul>
+                        </div>
+                        <div class="phase-arrow">→</div>
+                        <div class="phase-card phase-2">
+                            <div class="phase-number">2</div>
+                            <div class="phase-title">深度学习</div>
+                            <ul class="phase-items">
+                                <li>PointNet 基础</li>
+                                <li>PointNet++ 分割</li>
+                                <li>实例分割</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="phase-connector">
+                        <div class="connector-line"></div>
+                        <div class="connector-arrow">↓</div>
+                    </div>
+                    <div class="phase-row">
+                        <div class="phase-card phase-3">
+                            <div class="phase-number">3</div>
+                            <div class="phase-title">边缘部署</div>
+                            <ul class="phase-items horizontal">
+                                <li>模型量化</li>
+                                <li>ONNX 导出</li>
+                                <li>性能优化</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="phase-connector">
+                        <div class="connector-line"></div>
+                        <div class="connector-arrow">↓</div>
+                    </div>
+                    <div class="phase-row">
+                        <div class="phase-card phase-final">
+                            <div class="phase-icon">🚜</div>
+                            <div class="phase-title">久保田产品化</div>
+                            <div class="phase-subtitle">农机自动驾驶感知系统</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section">
+                <h2>💡 关键洞察</h2>
+                <div class="insight-box">
+                    <h4>1. 数据工程是被忽视的核心</h4>
+                    <blockquote>工业界真相：80% 的 AI 项目失败源于数据问题，不是模型。能自己构建数据集的工程师，比只会调用 API 的人更有价值。</blockquote>
+                </div>
+                <div class="insight-box">
+                    <h4>2. 失败分析是最强叙事</h4>
+                    <blockquote>"我系统测试了传统聚类方法，发现它在树冠交叠区域准确率只有 60%，这正是我选择研究深度学习的原因——传统方法有本质局限。"</blockquote>
+                </div>
+                <div class="insight-box">
+                    <h4>3. 理解算法边界显示深度</h4>
+                    <p>不是"调包侠"，而是真正理解：RANSAC 适用于针叶林（圆柱假设）、DBSCAN 的 eps 需根据林分调整、PointNet 用 Max Pooling 解决无序性。</p>
+                </div>
+            </section>
+
+            <section class="section">
+                <h2>📁 项目结构</h2>
+                <div class="folder-tree">
+                    <div class="folder-item level-0"><span class="folder-icon">📂</span><span
+                            class="folder-name">Niigata_Research_Prep/</span></div>
+                    <div class="folder-item level-1"><span class="folder-icon">📁</span><span
+                            class="folder-name">00_Raw_Data/</span><span class="folder-desc">原始 LiDAR 数据</span></div>
+                    <div class="folder-item level-1"><span class="folder-icon">📁</span><span
+                            class="folder-name">01_Processed/</span><span class="folder-desc">处理后点云</span></div>
+                    <div class="folder-item level-1"><span class="folder-icon">📁</span><span
+                            class="folder-name">02_Screenshots/</span><span class="folder-desc">学习过程截图</span></div>
+                    <div class="folder-item level-2"><span class="folder-icon">📁</span><span
+                            class="folder-name">failures/</span><span class="folder-desc">失败案例记录</span><span
+                            class="folder-new">NEW</span></div>
+                    <div class="folder-item level-1"><span class="folder-icon">📁</span><span
+                            class="folder-name">03_Scripts/</span><span class="folder-desc">Python 脚本</span></div>
+                    <div class="folder-item level-1"><span class="folder-icon">📁</span><span
+                            class="folder-name">04_Results/</span><span class="folder-desc">输出结果</span></div>
+                    <div class="folder-item level-1"><span class="folder-icon">📁</span><span
+                            class="folder-name">docs/</span><span class="folder-desc">项目文档</span></div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ==================== TAB 2: 研究方向 ==================== -->
+        <div id="research" class="tab-content">
+            <section class="section">
+                <h2>🔬 研究方向：传统与创新的融合</h2>
+                <p style="margin-bottom: 20px; color: var(--text-light);">
+                    我的研究是在实验室<strong>现有成果基础上</strong>的延伸与创新，而非完全另起炉灶。
+                </p>
+                <div class="compare-grid">
+                    <div class="compare-box traditional">
+                        <h4>🌲 实验室传统方法 <span class="preserve-tag">保留</span></h4>
+                        <ul>
+                            <li><strong>数据采集流程</strong> - UAV-LiDAR 飞行参数、航线规划</li>
+                            <li><strong>预处理流程</strong> - CSF 地面滤波、点云配准</li>
+                            <li><strong>CloudCompare 工作流</strong> - 可视化、手动编辑</li>
+                            <li><strong>DBH 测量方法</strong> - 1.3m 截面圆拟合</li>
+                            <li><strong>精度评估体系</strong> - 与实测数据对比的方法论</li>
+                        </ul>
+                    </div>
+                    <div class="compare-box innovation">
+                        <h4>🚀 我的创新方向 <span class="new-tag">新增</span></h4>
+                        <ul>
+                            <li><strong>深度学习分割</strong> - PointNet++ 替代手工特征</li>
+                            <li><strong>数据工程</strong> - 半自动标注生成训练集</li>
+                            <li><strong>边缘部署</strong> - 模型量化、ONNX 导出</li>
+                            <li><strong>失败案例分析</strong> - 系统性记录传统算法边界</li>
+                            <li><strong>实时处理</strong> - 面向农机场景的低延迟方案</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>📋 具体研究内容</h3>
+                <table>
+                    <tr>
+                        <th>研究内容</th>
+                        <th>传统做法</th>
+                        <th>我的改进</th>
+                        <th>预期贡献</th>
+                    </tr>
+                    <tr>
+                        <td><strong>单木分离</strong></td>
+                        <td>DBSCAN / 分水岭</td>
+                        <td>PointNet++ 实例分割</td>
+                        <td>树冠交叠处准确率 +20%</td>
+                    </tr>
+                    <tr>
+                        <td><strong>数据准备</strong></td>
+                        <td>纯手工标注</td>
+                        <td>算法粗标 + 人工修正</td>
+                        <td>标注效率提升 5x</td>
+                    </tr>
+                    <tr>
+                        <td><strong>模型部署</strong></td>
+                        <td>服务器离线处理</td>
+                        <td>ONNX + 量化边缘推理</td>
+                        <td>现场实时处理可能</td>
+                    </tr>
+                    <tr>
+                        <td><strong>参数优化</strong></td>
+                        <td>经验调参</td>
+                        <td>系统性测试 + 失败分析</td>
+                        <td>可复现的最佳实践</td>
+                    </tr>
+                </table>
+
+                <div class="insight-box">
+                    <h4>💡 核心定位</h4>
+                    <blockquote>
+                        我不是要否定实验室的传统方法，而是：<br>
+                        1. <strong>用传统方法解决数据标注问题</strong>（为深度学习服务）<br>
+                        2. <strong>用深度学习解决传统方法的瓶颈</strong>（树冠交叠、参数敏感）<br>
+                        3. <strong>用边缘部署拓展应用场景</strong>（从离线分析到实时处理）
+                    </blockquote>
+                </div>
+            </section>
+        </div>
+
+        <!-- ==================== TAB 3: 时间规划 ==================== -->
+        <div id="timeline" class="tab-content">
+            <section class="section">
+                <h2>📅 两年时间规划</h2>
+                <div class="timeline-compact">
+                    <div class="timeline-row">
+                        <div class="timeline-date">2026.02</div>
+                        <div class="timeline-phase">入门阶段</div>
+                        <div class="timeline-task">ITI 基础、DBSCAN、CloudCompare、<strong>失败分析</strong></div>
+                    </div>
+                    <div class="timeline-row">
+                        <div class="timeline-date">2026.04-06</div>
+                        <div class="timeline-phase">M1 春</div>
+                        <div class="timeline-task">深度学习基础、PyTorch、数据工程</div>
+                    </div>
+                    <div class="timeline-row">
+                        <div class="timeline-date">2026.07-09</div>
+                        <div class="timeline-phase">M1 夏</div>
+                        <div class="timeline-task">PointNet++ 实现、实验数据积累</div>
+                    </div>
+                    <div class="timeline-row highlight">
+                        <div class="timeline-date">2026.10-12</div>
+                        <div class="timeline-phase">M1 秋</div>
+                        <div class="timeline-task">📄 <strong>论文1</strong> 准备 - 日本国内会议</div>
+                    </div>
+                    <div class="timeline-row">
+                        <div class="timeline-date">2027.01-03</div>
+                        <div class="timeline-phase">M1 冬</div>
+                        <div class="timeline-task">论文投稿、日语 N1、C++ 补强</div>
+                    </div>
+                    <div class="timeline-row">
+                        <div class="timeline-date">2027.04-06</div>
+                        <div class="timeline-phase">M2 春</div>
+                        <div class="timeline-task">模型轻量化、边缘部署、ONNX</div>
+                    </div>
+                    <div class="timeline-row highlight">
+                        <div class="timeline-date">2027.07-09</div>
+                        <div class="timeline-phase">M2 夏</div>
+                        <div class="timeline-task">📄 <strong>论文2</strong> 准备 - 英文期刊</div>
+                    </div>
+                    <div class="timeline-row highlight">
+                        <div class="timeline-date">2027.10-12</div>
+                        <div class="timeline-phase">M2 秋</div>
+                        <div class="timeline-task">🚜 <strong>久保田面试</strong>、论文投稿</div>
+                    </div>
+                    <div class="timeline-row">
+                        <div class="timeline-date">2028.01-03</div>
+                        <div class="timeline-phase">M2 冬</div>
+                        <div class="timeline-task">毕业论文、入社准备</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section">
+                <h2>📊 论文发表规划</h2>
+                <table>
+                    <tr>
+                        <th>阶段</th>
+                        <th>目标论文</th>
+                        <th>类型</th>
+                        <th>主题</th>
+                    </tr>
+                    <tr>
+                        <td>M1 下</td>
+                        <td>论文 1</td>
+                        <td>日本国内会议</td>
+                        <td>传统方法 vs 深度学习对比</td>
+                    </tr>
+                    <tr>
+                        <td>M2 上</td>
+                        <td>论文 2</td>
+                        <td>英文期刊</td>
+                        <td>PointNet++ 森林分割</td>
+                    </tr>
+                    <tr>
+                        <td>M2 下</td>
+                        <td>论文 3（可选）</td>
+                        <td>会议/期刊</td>
+                        <td>边缘部署应用</td>
+                    </tr>
+                </table>
+            </section>
+        </div>
+
+        <!-- ==================== TAB 4: 短期学习 ==================== -->
+        <div id="learning" class="tab-content">
+            <section class="section">
+                <h2>📚 5-6 天学习计划 (ITI 入门)</h2>
+                <table>
+                    <tr>
+                        <th>Day</th>
+                        <th>日期</th>
+                        <th>主题</th>
+                        <th>核心产出</th>
+                    </tr>
+                    <tr>
+                        <td>1</td>
+                        <td>1/31</td>
+                        <td>CC + DBSCAN 基础</td>
+                        <td>分割截图</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>2/1</td>
+                        <td>参数优化 + Treeiso</td>
+                        <td>最佳参数</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>2/2</td>
+                        <td>完整 Pipeline</td>
+                        <td>测量表</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>2/3</td>
+                        <td>方法对比分析</td>
+                        <td>对比图表</td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>2/4</td>
+                        <td>整理 + Demo</td>
+                        <td>面试材料</td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td>2/5</td>
+                        <td>缓冲</td>
+                        <td>日语准备</td>
+                    </tr>
+                </table>
+            </section>
+
+            <section class="section">
+                <h2>🔬 失败分析任务 (关键环节)</h2>
+                <div class="insight-box">
+                    <h4>⚠️ 目的</h4>
+                    <p>记录传统算法的失败案例，为将来引入深度学习提供完美理由</p>
+                </div>
+
+                <h3>Day 1-4 必做的额外任务</h3>
+                <table>
+                    <tr>
+                        <th>测试场景</th>
+                        <th>关注问题</th>
+                        <th>记录内容</th>
+                    </tr>
+                    <tr>
+                        <td><strong>树冠交叠区</strong></td>
+                        <td>DBSCAN 能否正确分离？</td>
+                        <td>欠分割（多棵合一）的数量</td>
+                    </tr>
+                    <tr>
+                        <td><strong>不同 eps 值</strong></td>
+                        <td>参数敏感性如何？</td>
+                        <td>最佳参数是否因林分而异？</td>
+                    </tr>
+                    <tr>
+                        <td><strong>高密度区域</strong></td>
+                        <td>聚类是否崩溃？</td>
+                        <td>噪声点比例，错误合并数</td>
+                    </tr>
+                    <tr>
+                        <td><strong>边缘树木</strong></td>
+                        <td>边界点如何分配？</td>
+                        <td>过度分割（一棵分多）的情况</td>
+                    </tr>
+                </table>
+
+                <h3>📝 记录模板</h3>
+                <div class="code-block">📍 位置: [样地编号/坐标]
+                    🌲 树木数: [实际] vs [检测到]
+                    ❌ 失败类型: [欠分割 / 过度分割 / 完全漏检]
+                    🔧 尝试的参数: eps=?, min_samples=?
+                    💡 可能原因: [树冠交叠 / 点密度不均 / 高度变化大]
+                    📸 截图: [保存到 02_Screenshots/failures/]</div>
+            </section>
+
+            <section class="section">
+                <h2>📖 关键算法原理速查</h2>
+
+                <h3>1. DBSCAN (Density-Based Spatial Clustering)</h3>
+                <p><strong>核心思想</strong>: 基于密度的聚类，能发现任意形状的簇</p>
+                <p><strong>参数</strong>: <code>eps</code> (邻域半径), <code>min_samples</code> (核心点最少邻居数)</p>
+                <p><strong>优势</strong>: 不需预设簇数量，能处理噪声</p>
+
+                <h3>2. Connected Components（连通分量）</h3>
+                <p><strong>核心思想</strong>: 将空间上相连的点归为一组</p>
+                <p><strong>CloudCompare 参数</strong>: <code>Octree Level</code> (空间划分精度), <code>Min points</code>
+                    (最小点数阈值)</p>
+
+                <h3>3. RANSAC（随机采样一致）</h3>
+                <p><strong>核心思想</strong>: 随机采样 + 模型验证 + 迭代优化</p>
+                <p><strong>用途</strong>: 圆柱拟合（树干检测）、平面拟合</p>
+            </section>
+        </div>
+
+        <!-- ==================== TAB 5: 技能映射 ==================== -->
+        <div id="skills" class="tab-content">
+            <section class="section">
+                <h2>🔗 技能-职业映射</h2>
+                <table>
+                    <tr>
+                        <th>森林研究技能</th>
+                        <th>久保田直接应用</th>
+                        <th>重要度</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Python 编程</strong></td>
+                        <td>数据处理、模型开发</td>
+                        <td>⭐⭐⭐⭐⭐</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Open3D 点云处理</strong></td>
+                        <td>LiDAR 数据处理</td>
+                        <td>⭐⭐⭐⭐⭐</td>
+                    </tr>
+                    <tr>
+                        <td><strong>DBSCAN 聚类</strong></td>
+                        <td>实时障碍物分割</td>
+                        <td>⭐⭐⭐⭐</td>
+                    </tr>
+                    <tr>
+                        <td><strong>RANSAC 拟合</strong></td>
+                        <td>地面检测、物体识别</td>
+                        <td>⭐⭐⭐⭐</td>
+                    </tr>
+                    <tr>
+                        <td><strong>PointNet++</strong></td>
+                        <td>3D 感知模型</td>
+                        <td>⭐⭐⭐⭐⭐</td>
+                    </tr>
+                    <tr>
+                        <td><strong>模型量化/ONNX</strong></td>
+                        <td>边缘部署</td>
+                        <td>⭐⭐⭐⭐⭐</td>
+                    </tr>
+                    <tr>
+                        <td>CloudCompare</td>
+                        <td>数据可视化调试</td>
+                        <td>⭐⭐⭐</td>
+                    </tr>
+                </table>
+            </section>
+
+            <section class="section">
+                <h2>🎯 需要补充的技能</h2>
+                <table>
+                    <tr>
+                        <th>需要技能</th>
+                        <th>当前水平</th>
+                        <th>建议学习时间</th>
+                    </tr>
+                    <tr>
+                        <td><strong>C++</strong></td>
+                        <td>基础</td>
+                        <td>M1 上</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ROS</strong></td>
+                        <td>无</td>
+                        <td>M1 下</td>
+                    </tr>
+                    <tr>
+                        <td><strong>嵌入式部署</strong></td>
+                        <td>无</td>
+                        <td>M2 上</td>
+                    </tr>
+                    <tr>
+                        <td><strong>日语 N1</strong></td>
+                        <td>N2+</td>
+                        <td>M1 全年</td>
+                    </tr>
+                </table>
+            </section>
+
+            <section class="section">
+                <h2>💡 面试时如何表达这种关联</h2>
+                <div class="insight-box">
+                    <h4>示例回答</h4>
+                    <blockquote>
+                        "我在森林 LiDAR 研究中掌握的点云分割技术，与农机自动驾驶的障碍物检测在算法层面是相通的。
+                        例如，DBSCAN 聚类既可以分离树木，也可以分割田间障碍物。
+                        这种技术迁移能力，使我能快速适应久保田的研发工作。"
+                    </blockquote>
+                </div>
+            </section>
+        </div>
+
+        <!-- ==================== TAB 6: 工具手册 ==================== -->
+        <div id="tools" class="tab-content">
+            <section class="section">
+                <h2>🔧 LiDAR 树木检测工具箱</h2>
+
+                <h3>📁 文件概览</h3>
+                <table>
+                    <tr>
+                        <th>文件</th>
+                        <th>说明</th>
+                    </tr>
+                    <tr>
+                        <td><code>run.sh</code></td>
+                        <td>核心启动脚本，唯一需要运行的文件</td>
+                    </tr>
+                    <tr>
+                        <td><code>gui_app.py</code></td>
+                        <td>图形用户界面程序</td>
+                    </tr>
+                    <tr>
+                        <td><code>detect_cylinders_v2.py</code></td>
+                        <td>命令行检测脚本</td>
+                    </tr>
+                    <tr>
+                        <td><code>visualize_forest.py</code></td>
+                        <td>结果可视化脚本</td>
+                    </tr>
+                    <tr>
+                        <td><code>tree_utils.py</code></td>
+                        <td>共享算法库（RANSAC 核心）</td>
+                    </tr>
+                </table>
+
+                <h3>🚀 快速开始</h3>
+                <div class="code-block"># 启动 GUI（推荐）
+                    ./run.sh
+                    # 或
+                    ./run.sh gui
+
+                    # 命令行检测
+                    ./run.sh detect
+
+                    # 结果可视化
+                    ./run.sh visualize</div>
+            </section>
+
+            <section class="section">
+                <h2>⚙️ 参数调优指南</h2>
+                <table>
+                    <tr>
+                        <th>参数名</th>
+                        <th>默认值</th>
+                        <th>说明</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Distance Threshold</strong></td>
+                        <td>0.06 m</td>
+                        <td>点到圆柱模型的最大距离</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Min Points</strong></td>
+                        <td>50</td>
+                        <td>有效圆柱体所需最少点数</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Min Radius</strong></td>
+                        <td>0.03 m</td>
+                        <td>过滤过细的噪声</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Max Radius</strong></td>
+                        <td>0.8 m</td>
+                        <td>过滤过大的物体</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Min Height</strong></td>
+                        <td>1.0 m</td>
+                        <td>圆柱体最小高度</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Max Iterations</strong></td>
+                        <td>100</td>
+                        <td>最多检测多少棵树</td>
+                    </tr>
+                </table>
+            </section>
+
+            <section class="section">
+                <h2>⚠️ 算法适用边界与局限性</h2>
+
+                <h3>✅ 本工具适用于</h3>
+                <table>
+                    <tr>
+                        <th>场景</th>
+                        <th>原因</th>
+                    </tr>
+                    <tr>
+                        <td><strong>针叶林</strong> (杉木、松树)</td>
+                        <td>树干圆柱形明显，RANSAC 拟合效果好</td>
+                    </tr>
+                    <tr>
+                        <td><strong>中低密度林分</strong></td>
+                        <td>树木间距足够，减少干扰</td>
+                    </tr>
+                    <tr>
+                        <td><strong>成熟林</strong></td>
+                        <td>树干直径较大，检测信号强</td>
+                    </tr>
+                    <tr>
+                        <td><strong>高质量点云</strong> (&gt;50 pts/m²)</td>
+                        <td>足够的点数支撑拟合</td>
+                    </tr>
+                </table>
+
+                <h3>❌ 本工具不适用于</h3>
+                <table>
+                    <tr>
+                        <th>场景</th>
+                        <th>原因</th>
+                        <th>推荐替代方案</th>
+                    </tr>
+                    <tr>
+                        <td><strong>阔叶林</strong></td>
+                        <td>树干不规则，圆柱假设失效</td>
+                        <td>DBSCAN / 深度学习</td>
+                    </tr>
+                    <tr>
+                        <td><strong>灌木丛</strong></td>
+                        <td>无明显主干</td>
+                        <td>区域生长算法</td>
+                    </tr>
+                    <tr>
+                        <td><strong>幼树/细树</strong> (DBH &lt;5cm)</td>
+                        <td>点数不足</td>
+                        <td>降低 Min Points 或人工识别</td>
+                    </tr>
+                    <tr>
+                        <td><strong>多茎树</strong></td>
+                        <td>一棵树多个树干</td>
+                        <td>需后处理合并</td>
+                    </tr>
+                    <tr>
+                        <td><strong>严重倾斜树木</strong></td>
+                        <td>超出圆柱垂直假设</td>
+                        <td>修改算法支持任意方向</td>
+                    </tr>
+                </table>
+
+                <div class="insight-box">
+                    <h4>算法原理限制</h4>
+                    <blockquote>
+                        RANSAC 圆柱拟合的核心假设：<br>
+                        1. 树干近似垂直圆柱 → 倾斜超过 15° 可能失败<br>
+                        2. 树干表面连续 → 遮挡/缺失会导致欠拟合<br>
+                        3. 单一圆柱模型 → 无法处理分叉树干
+                    </blockquote>
+                </div>
+            </section>
+        </div>
+
+    </div>
+
+    <footer>
+        <p class="motto">每一行代码都是通向农机自动驾驶的阶梯 🌲→⚡→🚜</p>
+        <p>新潟森林 LiDAR 研究纲领 | 最后更新: 2026-01-31</p>
+    </footer>
+
+    <script>
+        // Tab Navigation
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Remove active from all buttons and content
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+                // Add active to clicked button and corresponding content
+                btn.classList.add('active');
+                document.getElementById(btn.dataset.tab).classList.add('active');
+
+                // Scroll to top of container
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        });
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>研究生两年规划 - 森林LiDAR → 久保田自动驾驶</title>
+    <style>
+        :root {
+            --primary: #2d5a27;
+            --secondary: #4a90a4;
+            --accent: #e67e22;
+            --bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text: #2c3e50;
+            --text-light: #7f8c8d;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans SC', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, #1a3a17 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            border-radius: 0 0 20px 20px;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+        }
+
+        header .subtitle {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .section {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .section h2 {
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Timeline Styles */
+        .timeline {
+            position: relative;
+            padding: 20px 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--primary), var(--secondary), var(--accent));
+            border-radius: 2px;
+        }
+
+        .timeline-item {
+            position: relative;
+            width: 45%;
+            padding: 20px;
+            background: var(--bg);
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .timeline-item.left {
+            margin-right: auto;
+            text-align: right;
+        }
+
+        .timeline-item.right {
+            margin-left: auto;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            top: 25px;
+            width: 16px;
+            height: 16px;
+            background: var(--primary);
+            border: 3px solid white;
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .timeline-item.left::before {
+            right: -8%;
+        }
+
+        .timeline-item.right::before {
+            left: -8%;
+        }
+
+        .timeline-date {
+            font-weight: bold;
+            color: var(--secondary);
+            font-size: 0.9em;
+        }
+
+        .timeline-title {
+            font-size: 1.1em;
+            color: var(--primary);
+            margin: 5px 0;
+        }
+
+        .timeline-content {
+            font-size: 0.95em;
+            color: var(--text-light);
+        }
+
+        .timeline-paper {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            margin-top: 5px;
+        }
+
+        /* Path Analysis */
+        .path-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .path-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .path-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        }
+
+        .path-card.recommended {
+            border-color: var(--success);
+            background: linear-gradient(135deg, rgba(39, 174, 96, 0.05) 0%, transparent 100%);
+        }
+
+        .path-card.recommended::before {
+            content: '⭐ 推荐';
+            background: var(--success);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            float: right;
+        }
+
+        .path-title {
+            font-size: 1.2em;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .path-tech {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin: 10px 0;
+        }
+
+        .tech-tag {
+            background: var(--bg);
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 0.85em;
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        .metric {
+            padding: 10px;
+            background: var(--bg);
+            border-radius: 8px;
+        }
+
+        .metric-value {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .metric-label {
+            font-size: 0.75em;
+            color: var(--text-light);
+        }
+
+        .difficulty {
+            display: flex;
+            gap: 3px;
+        }
+
+        .difficulty span {
+            width: 20px;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+        }
+
+        .difficulty span.filled {
+            background: var(--accent);
+        }
+
+        /* Paper Timeline */
+        .paper-plan {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .paper-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: var(--bg);
+            border-radius: 10px;
+            border-left: 4px solid var(--secondary);
+        }
+
+        .paper-number {
+            width: 40px;
+            height: 40px;
+            background: var(--secondary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .paper-info {
+            flex: 1;
+        }
+
+        .paper-title {
+            font-weight: bold;
+            color: var(--text);
+        }
+
+        .paper-venue {
+            font-size: 0.9em;
+            color: var(--text-light);
+        }
+
+        .paper-time {
+            font-size: 0.85em;
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        /* Skill Mapping */
+        .skill-flow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            background: var(--bg);
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+
+        .skill-box {
+            text-align: center;
+            padding: 15px 20px;
+            background: white;
+            border-radius: 10px;
+            min-width: 150px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .skill-box.forest {
+            border: 2px solid var(--primary);
+        }
+
+        .skill-box.kubota {
+            border: 2px solid var(--accent);
+        }
+
+        .arrow {
+            font-size: 2em;
+            color: var(--secondary);
+        }
+
+        /* Decision Tree */
+        .decision-tree {
+            background: var(--bg);
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .decision-node {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .decision-question {
+            display: inline-block;
+            background: var(--secondary);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .decision-branches {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 20px;
+        }
+
+        .branch {
+            text-align: center;
+            max-width: 250px;
+        }
+
+        .branch-label {
+            background: var(--primary);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+
+        .branch-result {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 0.9em;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .timeline::before {
+                left: 20px;
+            }
+
+            .timeline-item {
+                width: calc(100% - 50px);
+                margin-left: 50px !important;
+                text-align: left !important;
+            }
+
+            .timeline-item::before {
+                left: -40px !important;
+                right: auto !important;
+            }
+
+            .path-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .skill-flow {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .arrow {
+                transform: rotate(90deg);
+            }
+        }
+
+        .highlight {
+            background: linear-gradient(120deg, rgba(230, 126, 34, 0.2) 0%, rgba(230, 126, 34, 0.2) 100%);
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+
+        .tooltip {
+            position: relative;
+            cursor: help;
+            border-bottom: 1px dashed var(--text-light);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        th {
+            background: var(--bg);
+            color: var(--primary);
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 4px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-light);
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>🌲 研究生两年战略规划 🚜</h1>
+        <p class="subtitle">森林 LiDAR 点云处理 → 久保田农机自动驾驶</p>
+        <p style="margin-top: 15px; opacity: 0.8;">2026年4月 - 2028年3月 | 新潟大学</p>
+    </header>
+
+    <div class="container">
+
+        <!-- 核心目标 -->
+        <section class="section">
+            <h2>🎯 核心目标</h2>
+            <div
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; text-align: center;">
+                <div class="metric"
+                    style="background: linear-gradient(135deg, rgba(45,90,39,0.1), transparent); padding: 20px;">
+                    <div class="metric-value">2-3</div>
+                    <div class="metric-label">篇论文发表</div>
+                </div>
+                <div class="metric"
+                    style="background: linear-gradient(135deg, rgba(74,144,164,0.1), transparent); padding: 20px;">
+                    <div class="metric-value">久保田</div>
+                    <div class="metric-label">目标企业</div>
+                </div>
+                <div class="metric"
+                    style="background: linear-gradient(135deg, rgba(230,126,34,0.1), transparent); padding: 20px;">
+                    <div class="metric-value">自动驾驶</div>
+                    <div class="metric-label">目标岗位</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 时间轴 -->
+        <section class="section">
+            <h2>📅 两年时间轴</h2>
+            <div class="timeline">
+
+                <div class="timeline-item left">
+                    <div class="timeline-date">2026.02 面试前</div>
+                    <div class="timeline-title">ITI 技术入门</div>
+                    <div class="timeline-content">DBSCAN 单木分离、CloudCompare 实践、Treeiso 学习</div>
+                </div>
+
+                <div class="timeline-item right">
+                    <div class="timeline-date">2026.04-06 M1 春</div>
+                    <div class="timeline-title">基础巩固</div>
+                    <div class="timeline-content">研究室融入、文献阅读、深度学习入门 (PyTorch)</div>
+                </div>
+
+                <div class="timeline-item left">
+                    <div class="timeline-date">2026.07-09 M1 夏</div>
+                    <div class="timeline-title">核心技术开发</div>
+                    <div class="timeline-content">选择研究方向、PointNet++ 实现、实验数据积累</div>
+                </div>
+
+                <div class="timeline-item right">
+                    <div class="timeline-date">2026.10-12 M1 秋</div>
+                    <div class="timeline-title">第一篇论文准备</div>
+                    <div class="timeline-content">方法实现、对比实验、论文撰写</div>
+                    <span class="timeline-paper">📄 论文1 准备</span>
+                </div>
+
+                <div class="timeline-item left">
+                    <div class="timeline-date">2027.01-03 M1 冬</div>
+                    <div class="timeline-title">论文投稿 + 日语强化</div>
+                    <div class="timeline-content">投稿日本国内会议、N1 备考、C++ 补强</div>
+                    <span class="timeline-paper">📄 论文1 投稿</span>
+                </div>
+
+                <div class="timeline-item right">
+                    <div class="timeline-date">2027.04-06 M2 春</div>
+                    <div class="timeline-title">深化研究</div>
+                    <div class="timeline-content">第二方向探索、企业调研、实习申请</div>
+                </div>
+
+                <div class="timeline-item left">
+                    <div class="timeline-date">2027.07-09 M2 夏</div>
+                    <div class="timeline-title">第二篇论文 + 实习</div>
+                    <div class="timeline-content">英文论文撰写、久保田/相关企业实习</div>
+                    <span class="timeline-paper">📄 论文2 准备</span>
+                </div>
+
+                <div class="timeline-item right">
+                    <div class="timeline-date">2027.10-12 M2 秋</div>
+                    <div class="timeline-title">就职活动</div>
+                    <div class="timeline-content">久保田选考、论文投稿、毕业论文启动</div>
+                    <span class="timeline-paper">📄 论文2 投稿</span>
+                </div>
+
+                <div class="timeline-item left">
+                    <div class="timeline-date">2028.01-03 M2 冬</div>
+                    <div class="timeline-title">毕业准备</div>
+                    <div class="timeline-content">毕业论文完成、入社准备、技术交接</div>
+                    <span class="timeline-paper">📄 毕业论文</span>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 研究路径选择 -->
+        <section class="section">
+            <h2>🔀 研究路径选择分析</h2>
+            <p style="margin-bottom: 20px; color: var(--text-light);">
+                以下是三种主要研究方向，你可以选择<span class="highlight">重点突破1-2个方向</span>，每个方向都可产出论文。
+            </p>
+
+            <div class="path-grid">
+
+                <!-- 路径 A -->
+                <div class="path-card recommended">
+                    <div class="path-title">路径 A: 深度学习点云分割</div>
+                    <div class="path-tech">
+                        <span class="tech-tag">PointNet++</span>
+                        <span class="tech-tag">3D Transformer</span>
+                        <span class="tech-tag">实例分割</span>
+                    </div>
+                    <div class="metrics">
+                        <div class="metric">
+                            <div class="metric-value">高</div>
+                            <div class="metric-label">论文潜力</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value">高</div>
+                            <div class="metric-label">久保田关联</div>
+                        </div>
+                        <div class="metric">
+                            <div style="display: flex; justify-content: center;">
+                                <div class="difficulty">
+                                    <span class="filled"></span>
+                                    <span class="filled"></span>
+                                    <span class="filled"></span>
+                                    <span class="filled"></span>
+                                    <span></span>
+                                </div>
+                            </div>
+                            <div class="metric-label">难度 4/5</div>
+                        </div>
+                    </div>
+                    <p><strong>论文产出 (2篇)</strong></p>
+                    <ul style="font-size: 0.9em; color: var(--text-light); padding-left: 20px;">
+                        <li>PointNet++ 应用于 UAV-LiDAR 单木分割</li>
+                        <li>Transformer 改进的树冠分割方法</li>
+                    </ul>
+                    <p style="margin-top: 10px;"><strong>久保田迁移</strong>: 直接用于障碍物检测网络</p>
+                </div>
+
+                <!-- 路径 B -->
+                <div class="path-card">
+                    <div class="path-title">路径 B: 实时处理与边缘部署</div>
+                    <div class="path-tech">
+                        <span class="tech-tag">模型轻量化</span>
+                        <span class="tech-tag">TensorRT</span>
+                        <span class="tech-tag">Jetson</span>
+                    </div>
+                    <div class="metrics">
+                        <div class="metric">
+                            <div class="metric-value">中高</div>
+                            <div class="metric-label">论文潜力</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value">极高</div>
+                            <div class="metric-label">久保田关联</div>
+                        </div>
+                        <div class="metric">
+                            <div style="display: flex; justify-content: center;">
+                                <div class="difficulty">
+                                    <span class="filled"></span>
+                                    <span class="filled"></span>
+                                    <span class="filled"></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                            </div>
+                            <div class="metric-label">难度 3/5</div>
+                        </div>
+                    </div>
+                    <p><strong>论文产出 (1-2篇)</strong></p>
+                    <ul style="font-size: 0.9em; color: var(--text-light); padding-left: 20px;">
+                        <li>轻量级单木分割模型设计</li>
+                        <li>嵌入式森林调查系统</li>
+                    </ul>
+                    <p style="margin-top: 10px;"><strong>久保田迁移</strong>: 核心需求！实时感知是农机必备</p>
+                </div>
+
+                <!-- 路径 C -->
+                <div class="path-card">
+                    <div class="path-title">路径 C: 传统方法改进</div>
+                    <div class="path-tech">
+                        <span class="tech-tag">Graph-Cut 优化</span>
+                        <span class="tech-tag">多尺度聚类</span>
+                        <span class="tech-tag">混合方法</span>
+                    </div>
+                    <div class="metrics">
+                        <div class="metric">
+                            <div class="metric-value">中</div>
+                            <div class="metric-label">论文潜力</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value">中</div>
+                            <div class="metric-label">久保田关联</div>
+                        </div>
+                        <div class="metric">
+                            <div style="display: flex; justify-content: center;">
+                                <div class="difficulty">
+                                    <span class="filled"></span>
+                                    <span class="filled"></span>
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                            </div>
+                            <div class="metric-label">难度 2/5</div>
+                        </div>
+                    </div>
+                    <p><strong>论文产出 (1篇)</strong></p>
+                    <ul style="font-size: 0.9em; color: var(--text-light); padding-left: 20px;">
+                        <li>改进的 DBSCAN + 高度约束分割</li>
+                    </ul>
+                    <p style="margin-top: 10px;"><strong>久保田迁移</strong>: 算法思维，但竞争力略低</p>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 推荐组合 -->
+        <section class="section">
+            <h2>💡 推荐研究组合</h2>
+
+            <div class="decision-tree">
+                <div class="decision-node">
+                    <div class="decision-question">你的目标是？</div>
+                </div>
+                <div class="decision-branches">
+                    <div class="branch">
+                        <div class="branch-label">最大化论文</div>
+                        <div class="branch-result">
+                            <strong>路径 A + C</strong><br>
+                            深度学习 2 篇 + 传统改进 1 篇<br>
+                            <span style="color: var(--success);">预计 3 篇</span>
+                        </div>
+                    </div>
+                    <div class="branch">
+                        <div class="branch-label">平衡发展（推荐）</div>
+                        <div class="branch-result">
+                            <strong>路径 A + B</strong><br>
+                            深度学习 1 篇 + 实时部署 1 篇<br>
+                            <span style="color: var(--success);">预计 2 篇 + 最强久保田竞争力</span>
+                        </div>
+                    </div>
+                    <div class="branch">
+                        <div class="branch-label">稳妥路线</div>
+                        <div class="branch-result">
+                            <strong>路径 C + A（浅层）</strong><br>
+                            传统改进 1 篇 + 深度学习应用 1 篇<br>
+                            <span style="color: var(--warning);">预计 2 篇，风险低</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 论文发表计划 -->
+        <section class="section">
+            <h2>📄 论文发表计划（目标 2-3 篇）</h2>
+
+            <div class="paper-plan">
+                <div class="paper-item">
+                    <div class="paper-number">1</div>
+                    <div class="paper-info">
+                        <div class="paper-title">方法比较/传统改进类</div>
+                        <div class="paper-venue">日本森林学会 / 農業情報学会年次大会</div>
+                    </div>
+                    <div class="paper-time">M1 下 (2027.03)</div>
+                </div>
+
+                <div class="paper-item" style="border-left-color: var(--primary);">
+                    <div class="paper-number" style="background: var(--primary);">2</div>
+                    <div class="paper-info">
+                        <div class="paper-title">深度学习创新类（核心论文）</div>
+                        <div class="paper-venue">Remote Sensing (IF~5) / Forests (IF~3) / IGARSS</div>
+                    </div>
+                    <div class="paper-time">M2 上 (2027.09)</div>
+                </div>
+
+                <div class="paper-item" style="border-left-color: var(--accent);">
+                    <div class="paper-number" style="background: var(--accent);">3</div>
+                    <div class="paper-info">
+                        <div class="paper-title">应用系统类（可选）</div>
+                        <div class="paper-venue">Sensors / 国际会议</div>
+                    </div>
+                    <div class="paper-time">M2 下 (2028.01)</div>
+                </div>
+            </div>
+
+            <div style="margin-top: 20px; padding: 15px; background: var(--bg); border-radius: 10px;">
+                <strong>📌 发表策略建议</strong>
+                <ul style="margin-top: 10px; padding-left: 20px; color: var(--text-light);">
+                    <li><strong>论文1</strong>: 日语，国内会议，建立信心，练习写作</li>
+                    <li><strong>论文2</strong>: 英语，SCI期刊，核心成果，择优投稿</li>
+                    <li><strong>论文3</strong>: 如时间充裕，可将毕业论文扩展</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- 技能映射 -->
+        <section class="section">
+            <h2>🔗 技能 → 久保田 映射</h2>
+
+            <div class="skill-flow">
+                <div class="skill-box forest">
+                    <div style="font-weight: bold; color: var(--primary);">森林研究</div>
+                    <div>点云分割</div>
+                </div>
+                <div class="arrow">→</div>
+                <div class="skill-box kubota">
+                    <div style="font-weight: bold; color: var(--accent);">久保田</div>
+                    <div>障碍物检测</div>
+                </div>
+            </div>
+
+            <div class="skill-flow">
+                <div class="skill-box forest">
+                    <div style="font-weight: bold; color: var(--primary);">森林研究</div>
+                    <div>PointNet++</div>
+                </div>
+                <div class="arrow">→</div>
+                <div class="skill-box kubota">
+                    <div style="font-weight: bold; color: var(--accent);">久保田</div>
+                    <div>3D 感知模型</div>
+                </div>
+            </div>
+
+            <div class="skill-flow">
+                <div class="skill-box forest">
+                    <div style="font-weight: bold; color: var(--primary);">森林研究</div>
+                    <div>边缘部署</div>
+                </div>
+                <div class="arrow">→</div>
+                <div class="skill-box kubota">
+                    <div style="font-weight: bold; color: var(--accent);">久保田</div>
+                    <div>车载计算平台</div>
+                </div>
+            </div>
+
+            <table style="margin-top: 20px;">
+                <tr>
+                    <th>需要补充的技能</th>
+                    <th>重要程度</th>
+                    <th>建议时间</th>
+                </tr>
+                <tr>
+                    <td>C++ 编程</td>
+                    <td>
+                        <div class="progress-bar" style="width: 80px;">
+                            <div class="progress-fill" style="width: 70%;"></div>
+                        </div>
+                    </td>
+                    <td>M1 全年</td>
+                </tr>
+                <tr>
+                    <td>ROS 机器人系统</td>
+                    <td>
+                        <div class="progress-bar" style="width: 80px;">
+                            <div class="progress-fill" style="width: 60%;"></div>
+                        </div>
+                    </td>
+                    <td>M1 下 - M2 上</td>
+                </tr>
+                <tr>
+                    <td>日语 N1</td>
+                    <td>
+                        <div class="progress-bar" style="width: 80px;">
+                            <div class="progress-fill" style="width: 90%;"></div>
+                        </div>
+                    </td>
+                    <td>M1 (2027.07考试)</td>
+                </tr>
+            </table>
+        </section>
+
+        <!-- 可行性评估 -->
+        <section class="section">
+            <h2>📊 可行性评估</h2>
+
+            <table>
+                <tr>
+                    <th>评估项</th>
+                    <th>评分</th>
+                    <th>说明</th>
+                </tr>
+                <tr>
+                    <td>研究方向与目标匹配度</td>
+                    <td><span style="color: var(--success); font-weight: bold;">85%</span></td>
+                    <td>LiDAR 点云 = 自动驾驶核心</td>
+                </tr>
+                <tr>
+                    <td>发表 2 篇论文可行性</td>
+                    <td><span style="color: var(--success); font-weight: bold;">80%</span></td>
+                    <td>时间充裕，方向明确</td>
+                </tr>
+                <tr>
+                    <td>发表 3 篇论文可行性</td>
+                    <td><span style="color: var(--warning); font-weight: bold;">60%</span></td>
+                    <td>需高效执行，M1 就启动</td>
+                </tr>
+                <tr>
+                    <td>进入久保田可行性</td>
+                    <td><span style="color: var(--success); font-weight: bold;">75%</span></td>
+                    <td>需补强 C++/ROS/日语</td>
+                </tr>
+            </table>
+        </section>
+
+        <!-- 关键里程碑 -->
+        <section class="section">
+            <h2>🚩 关键里程碑检查点</h2>
+
+            <table>
+                <tr>
+                    <th>时间点</th>
+                    <th>检查项</th>
+                    <th>状态</th>
+                </tr>
+                <tr>
+                    <td>2026.06</td>
+                    <td>PyTorch 入门完成，能跑通 PointNet</td>
+                    <td>⬜</td>
+                </tr>
+                <tr>
+                    <td>2026.09</td>
+                    <td>确定核心研究方向（路径 A/B/C）</td>
+                    <td>⬜</td>
+                </tr>
+                <tr>
+                    <td>2026.12</td>
+                    <td>论文1 初稿完成</td>
+                    <td>⬜</td>
+                </tr>
+                <tr>
+                    <td>2027.03</td>
+                    <td>论文1 投稿 / 接收</td>
+                    <td>⬜</td>
+                </tr>
+                <tr>
+                    <td>2027.06</td>
+                    <td>英文论文写作能力</td>
+                    <td>⬜</td>
+                </tr>
+                <tr>
+                    <td>2027.07</td>
+                    <td>日语 N1 通过</td>
+                    <td>⬜</td>
+                </tr>
+                <tr>
+                    <td>2027.09</td>
+                    <td>论文2 投稿</td>
+                    <td>⬜</td>
+                </tr>
+                <tr>
+                    <td>2027.12</td>
+                    <td>获得久保田内定</td>
+                    <td>⬜</td>
+                </tr>
+                <tr>
+                    <td>2028.02</td>
+                    <td>毕业论文提交</td>
+                    <td>⬜</td>
+                </tr>
+            </table>
+        </section>
+
+    </div>
+
+    <footer>
+        <p>📅 创建于 2026-01-30 | 🎯 目标: 久保田自动驾驶</p>
+        <p>记住：每一项森林研究技能，都是通向农机自动驾驶的桥梁 🌲→🚜</p>
+    </footer>
+
+</body>
+
+</html>

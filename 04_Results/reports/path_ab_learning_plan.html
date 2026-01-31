@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>路径 A+B 详细学习方案 - 深度学习 + 边缘部署</title>
+    <style>
+        :root {
+            --primary: #1a5f7a;
+            --secondary: #159895;
+            --accent: #57c5b6;
+            --highlight: #e74c3c;
+            --bg: #f0f5f9;
+            --card: #ffffff;
+            --text: #2c3e50;
+            --text-light: #7f8c8d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans SC', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 50px 20px;
+            text-align: center;
+            border-radius: 0 0 30px 30px;
+        }
+
+        header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        header .badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin: 5px;
+        }
+
+        .section {
+            background: var(--card);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .section h2 {
+            color: var(--primary);
+            border-left: 4px solid var(--secondary);
+            padding-left: 15px;
+            margin-bottom: 20px;
+        }
+
+        .section h3 {
+            color: var(--secondary);
+            margin: 20px 0 10px 0;
+        }
+
+        .principle-box {
+            background: linear-gradient(135deg, #e8f4f8, #f0f9ff);
+            border-left: 4px solid var(--primary);
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .principle-box h4 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .principle-box pre {
+            background: #1e3a5f;
+            color: #a8d8ea;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+
+        .career-link {
+            background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+            border-left: 4px solid #e67e22;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .career-link::before {
+            content: '🚜 久保田关联：';
+            font-weight: bold;
+            color: #e67e22;
+        }
+
+        .timeline-vertical {
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .timeline-vertical::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(to bottom, var(--primary), var(--secondary), var(--accent));
+        }
+
+        .tl-item {
+            position: relative;
+            padding: 15px 0 15px 20px;
+            border-bottom: 1px dashed #e0e0e0;
+        }
+
+        .tl-item:last-child {
+            border-bottom: none;
+        }
+
+        .tl-item::before {
+            content: '';
+            position: absolute;
+            left: -26px;
+            top: 20px;
+            width: 12px;
+            height: 12px;
+            background: var(--secondary);
+            border: 2px solid white;
+            border-radius: 50%;
+        }
+
+        .tl-date {
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 0.9em;
+        }
+
+        .tl-title {
+            font-weight: 600;
+            margin: 5px 0;
+        }
+
+        .tl-content {
+            font-size: 0.95em;
+            color: var(--text-light);
+        }
+
+        .skill-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .skill-card {
+            background: var(--bg);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .skill-card h4 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .progress-track {
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            margin-top: 5px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+        }
+
+        .checklist {
+            list-style: none;
+        }
+
+        .checklist li {
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .checklist li::before {
+            content: '☐';
+            font-size: 1.2em;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+
+        .warning-box {
+            background: linear-gradient(135deg, #ffe6e6, #ffcccc);
+            border-left: 4px solid #e74c3c;
+            padding: 15px;
+            border-radius: 0 10px 10px 0;
+            margin: 15px 0;
+        }
+
+        .tab-container {
+            margin: 20px 0;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab:hover {
+            background: #f5f5f5;
+        }
+
+        .tab.active {
+            border-bottom-color: var(--primary);
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 20px 0;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        th {
+            background: var(--bg);
+            color: var(--primary);
+        }
+
+        .phase-header {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin: 30px 0 20px 0;
+            font-size: 1.2em;
+        }
+
+        .resource-link {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            text-decoration: none;
+            margin: 5px;
+            font-size: 0.9em;
+        }
+
+        .resource-link:hover {
+            background: var(--secondary);
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-light);
+        }
+
+        @media (max-width: 768px) {
+            .skill-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>🧠 路径 A+B 详细学习方案</h1>
+        <p>深度学习点云分割 + 实时处理与边缘部署</p>
+        <div style="margin-top: 15px;">
+            <span class="badge">📄 目标: 2篇论文</span>
+            <span class="badge">🚜 目标: 久保田</span>
+            <span class="badge">⏰ 周期: 2年</span>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <!-- 可行性分析 -->
+        <section class="section">
+            <h2>🔍 边缘部署在实验室的可行性</h2>
+
+            <div class="highlight-box">
+                <strong>结论：完全可行！</strong> 边缘部署的核心技能可以在任何电脑上学习，不需要真实嵌入式硬件。
+            </div>
+
+            <table>
+                <tr>
+                    <th>理想设备</th>
+                    <th>你可能没有</th>
+                    <th>替代方案</th>
+                    <th>效果</th>
+                </tr>
+                <tr>
+                    <td>Jetson Nano/Xavier</td>
+                    <td>❌</td>
+                    <td>用 CPU 模拟 + 速度 benchmark</td>
+                    <td>✅ 掌握核心技能</td>
+                </tr>
+                <tr>
+                    <td>NVIDIA GPU 服务器</td>
+                    <td>可能有</td>
+                    <td>Google Colab (免费)</td>
+                    <td>✅ 训练模型</td>
+                </tr>
+                <tr>
+                    <td>TensorRT</td>
+                    <td>需要 NVIDIA</td>
+                    <td>ONNX Runtime</td>
+                    <td>✅ 模型优化</td>
+                </tr>
+            </table>
+
+            <div class="career-link">
+                久保田面试时，展示你理解模型轻量化、量化、ONNX 导出的原理，比拥有硬件更重要！
+            </div>
+        </section>
+
+        <!-- 学习原则 -->
+        <section class="section">
+            <h2>📐 学习方法论（根据你的偏好）</h2>
+
+            <div class="skill-grid">
+                <div class="skill-card">
+                    <h4>🎯 原理先行</h4>
+                    <p>每学一个技术，先理解"为什么"和"怎么工作"，再动手实践</p>
+                </div>
+                <div class="skill-card">
+                    <h4>🔗 目标导向</h4>
+                    <p>每项技能都明确与久保田/论文的关联</p>
+                </div>
+                <div class="skill-card">
+                    <h4>📊 系统思维</h4>
+                    <p>建立知识框架，而非碎片化学习</p>
+                </div>
+                <div class="skill-card">
+                    <h4>✍️ 输出驱动</h4>
+                    <p>每个阶段有明确产出（代码/论文/Demo）</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====== 数据工程 ====== -->
+        <div class="phase-header">🏗️ 数据工程 (Data Engineering) - 深度学习的基石</div>
+
+        <section class="section">
+            <h2>💾 数据标注：被忽视的关键环节</h2>
+
+            <div class="warning-box">
+                <strong>核心问题</strong>：深度学习（如 PointNet）需要成千上万个带标签的树木样本。这些数据从哪来？
+            </div>
+
+            <h3>📐 半自动标注流程</h3>
+
+            <div class="principle-box">
+                <h4>利用现有算法生成训练数据</h4>
+                <pre>
+传统方法的新用途：不是最终方案，而是数据生产工具
+
+半自动标注流程:
+┌─────────────────────────────────────────────────────────┐
+│ 1. 粗标注 (Coarse Labeling)                              │
+│    使用 RANSAC + DBSCAN 自动分割                         │
+│    - 约 70-80% 的树木能被正确分离                        │
+│    - 产出: 初步实例标签                                  │
+│                                                          │
+│ 2. 人工修正 (Manual Correction)                          │
+│    使用 CloudCompare 检查并修正                          │
+│    - 合并过度分割的点                                    │
+│    - 分离欠分割的树冠                                    │
+│    - 删除错误标签（灌木、噪声）                          │
+│                                                          │
+│ 3. 质量控制 (Quality Control)                            │
+│    交叉验证 + 抽样检查                                   │
+│    - 确保标注一致性                                      │
+│    - 记录困难案例（为后续改进提供方向）                   │
+│                                                          │
+│ 4. 数据集构建 (Dataset Construction)                     │
+│    导出标准格式 (HDF5/NPY)                               │
+│    - 训练集 70% / 验证集 15% / 测试集 15%                │
+│    - 保存元数据（林分类型、点密度、采集时间）             │
+└─────────────────────────────────────────────────────────┘
+                </pre>
+            </div>
+
+            <h3>💡 为什么这很重要？</h3>
+
+            <div class="highlight-box">
+                <strong>工业界真相：</strong>数据处理能力比模型调参更重要！
+                <ul style="margin-top: 10px; padding-left: 20px;">
+                    <li>80% 的 AI 项目失败原因是数据质量问题，不是模型</li>
+                    <li>能自己构建数据集的工程师，比只会调用 API 的人更有价值</li>
+                    <li>理解数据来源 = 理解模型的能力边界</li>
+                </ul>
+            </div>
+
+            <div class="career-link">
+                久保田的农机传感器每天产生海量数据。如何高效标注、如何保证数据质量、如何建立数据流水线——这些正是产品化的核心能力！
+            </div>
+
+            <h3>🎯 阶段产出</h3>
+            <ul class="checklist">
+                <li>使用 RANSAC+DBSCAN 完成一个样本林分的粗标注</li>
+                <li>使用 CloudCompare 手动修正 100+ 棵树</li>
+                <li>建立自己的小型单木分割数据集 (500+ 实例)</li>
+                <li>记录"困难案例"：哪些树分不开？为什么？</li>
+            </ul>
+
+            <h3>💻 标注工具代码示例</h3>
+            <div class="code-block">
+                import open3d as o3d
+                import numpy as np
+
+                def generate_pseudo_labels(point_cloud_path, output_path):
+                """
+                使用 DBSCAN 生成伪标签，供后续人工修正
+                """
+                pcd = o3d.io.read_point_cloud(point_cloud_path)
+                points = np.asarray(pcd.points)
+
+                # Step 1: 地面移除 (CSF 或简单高度阈值)
+                ground_mask = points[:, 2] < np.percentile(points[:, 2], 5) + 0.5 vegetation=points[~ground_mask] # Step
+                    2: DBSCAN 聚类 from sklearn.cluster import DBSCAN clustering=DBSCAN(eps=0.8,
+                    min_samples=20).fit(vegetation) labels=clustering.labels_ # Step 3: 保存结果供 CloudCompare 检查 #
+                    每个聚类用不同颜色，方便人工修正 colors=plt.cm.tab20(labels % 20)[:, :3] vegetation_pcd=o3d.geometry.PointCloud()
+                    vegetation_pcd.points=o3d.utility.Vector3dVector(vegetation)
+                    vegetation_pcd.colors=o3d.utility.Vector3dVector(colors) o3d.io.write_point_cloud(output_path,
+                    vegetation_pcd) print(f"生成 {len(set(labels)) - 1} 个伪标签") print(f"噪声点: {sum(labels==-1)} 个")
+                    print("请在 CloudCompare 中打开并修正标签") return labels </div>
+        </section>
+
+        <!-- ====== 路径 A: 深度学习 ====== -->
+        <div class="phase-header">📚 路径 A: 深度学习点云分割</div>
+
+        <section class="section">
+            <h2>A.1 阶段一：深度学习基础 (M1: 4-6月)</h2>
+
+            <h3>📐 核心原理：什么是深度学习？</h3>
+
+            <div class="principle-box">
+                <h4>神经网络本质</h4>
+                <p>神经网络是一个<strong>参数化的函数</strong>，通过数据学习参数：</p>
+                <pre>
+y = f(x; θ)
+
+x: 输入数据（点云）
+y: 输出预测（分类标签）
+θ: 可学习参数（权重）
+f: 网络结构（层的组合）
+
+训练过程:
+1. 前向传播: 计算预测值 ŷ = f(x; θ)
+2. 计算损失: L = loss(ŷ, y_true)
+3. 反向传播: 计算梯度 ∂L/∂θ
+4. 更新参数: θ = θ - lr × ∂L/∂θ
+            </pre>
+            </div>
+
+            <div class="career-link">
+                久保田的自动驾驶感知模块就是用神经网络做障碍物检测，原理完全相同！
+            </div>
+
+            <h3>📚 学习内容</h3>
+            <ul class="checklist">
+                <li>Python 进阶：NumPy 广播、向量化操作</li>
+                <li>PyTorch 基础：Tensor、自动微分、DataLoader</li>
+                <li>MLP 实现：手写一个多层感知机，理解反向传播</li>
+                <li>CNN 基础：卷积、池化、特征图</li>
+            </ul>
+
+            <h3>🎯 阶段产出</h3>
+            <ul class="checklist">
+                <li>能用 PyTorch 从零实现 MLP 训练 MNIST</li>
+                <li>理解损失函数、优化器、学习率的作用</li>
+                <li>完成一个 CNN 图像分类小项目</li>
+            </ul>
+
+            <h3>📖 推荐资源</h3>
+            <p>
+                <a class="resource-link" href="#">李沐《动手学深度学习》</a>
+                <a class="resource-link" href="#">PyTorch 官方教程</a>
+                <a class="resource-link" href="#">3Blue1Brown 神经网络视频</a>
+            </p>
+        </section>
+
+        <section class="section">
+            <h2>A.2 阶段二：PointNet 理解与实现 (M1: 7-9月)</h2>
+
+            <h3>📐 核心原理：PointNet 如何处理点云？</h3>
+
+            <div class="principle-box">
+                <h4>点云处理的挑战</h4>
+                <pre>
+传统深度学习假设输入是规则数据:
+- 图像: (H, W, C) 固定网格
+- 序列: (T, D) 有序序列
+
+点云的特殊性:
+- 无序性: {p1, p2, p3} = {p3, p1, p2}
+- 不规则: 点数不固定
+- 稀疏性: 3D 空间大部分是空的
+
+PointNet 的解决方案:
+┌─────────────────────────────────────────────┐
+│  输入: (N, 3)           N 个点，每点 xyz    │
+│         ↓                                   │
+│  共享 MLP: (N, 3) → (N, 64) → (N, 1024)    │
+│         ↓                                   │
+│  对称函数 (Max Pooling): (N, 1024) → (1024) │
+│         ↓                                   │
+│  全局特征向量，与点顺序无关                  │
+└─────────────────────────────────────────────┘
+
+关键洞察: Max Pooling 是对称函数
+max({a, b, c}) = max({c, a, b})
+因此输出与输入顺序无关！
+            </pre>
+            </div>
+
+            <div class="career-link">
+                PointNet 是自动驾驶 LiDAR 处理的基础架构，久保田的 3D 感知很可能基于此！
+            </div>
+
+            <h3>📚 学习内容</h3>
+            <ul class="checklist">
+                <li>阅读 PointNet 原论文（2017, CVPR）</li>
+                <li>理解 T-Net（空间变换网络）的作用</li>
+                <li>手写 PointNet 分类网络</li>
+                <li>在 ModelNet40 数据集上训练</li>
+            </ul>
+
+            <h3>🎯 阶段产出</h3>
+            <ul class="checklist">
+                <li>能向别人解释 PointNet 的核心思想</li>
+                <li>有一份可运行的 PointNet 代码</li>
+                <li>在 ModelNet40 上达到 85%+ 准确率</li>
+            </ul>
+
+            <h3>💻 代码框架</h3>
+            <div class="code-block">
+                import torch
+                import torch.nn as nn
+
+                class PointNet(nn.Module):
+                def __init__(self, num_classes=40):
+                super().__init__()
+                # 共享 MLP
+                self.mlp1 = nn.Sequential(
+                nn.Conv1d(3, 64, 1),
+                nn.BatchNorm1d(64),
+                nn.ReLU()
+                )
+                self.mlp2 = nn.Sequential(
+                nn.Conv1d(64, 128, 1),
+                nn.BatchNorm1d(128),
+                nn.ReLU()
+                )
+                self.mlp3 = nn.Sequential(
+                nn.Conv1d(128, 1024, 1),
+                nn.BatchNorm1d(1024),
+                nn.ReLU()
+                )
+                # 分类头
+                self.fc = nn.Sequential(
+                nn.Linear(1024, 512),
+                nn.ReLU(),
+                nn.Dropout(0.3),
+                nn.Linear(512, num_classes)
+                )
+
+                def forward(self, x):
+                # x: (B, N, 3) -> (B, 3, N)
+                x = x.permute(0, 2, 1)
+                x = self.mlp1(x)
+                x = self.mlp2(x)
+                x = self.mlp3(x)
+                # 对称函数: Max Pooling
+                x = torch.max(x, dim=2)[0] # (B, 1024)
+                x = self.fc(x)
+                return x
+            </div>
+        </section>
+
+        <section class="section">
+            <h2>A.3 阶段三：PointNet++ 与实例分割 (M1: 10-12月)</h2>
+
+            <h3>📐 核心原理：PointNet++ 的改进</h3>
+
+            <div class="principle-box">
+                <h4>PointNet 的局限与 PointNet++ 的解决</h4>
+                <pre>
+PointNet 问题: 缺乏局部结构信息
+- 全局 Max Pooling 丢失了局部几何
+- 无法捕捉点之间的空间关系
+
+PointNet++ 解决方案: 层次化特征学习
+
+Set Abstraction Layer (SA层):
+┌─────────────────────────────────────────────┐
+│ 1. Sampling (采样)                          │
+│    使用 FPS (最远点采样) 选择中心点          │
+│    - 从 N 个点选 N' 个代表点                 │
+│    - 保证覆盖均匀                            │
+│                                             │
+│ 2. Grouping (分组)                          │
+│    对每个中心点，找 K 个邻居形成局部区域      │
+│    - Ball Query: 半径 r 内的点               │
+│    - KNN: 最近的 K 个点                      │
+│                                             │
+│ 3. PointNet (特征提取)                       │
+│    对每个局部区域应用 PointNet                │
+│    - 提取局部特征                            │
+│    - 输出: (N', C') 新的点集                 │
+└─────────────────────────────────────────────┘
+
+堆叠多个 SA 层 → 层次化特征金字塔
+            </pre>
+            </div>
+
+            <h3>📐 实例分割 vs 语义分割</h3>
+
+            <div class="principle-box">
+                <h4>分割任务对比</h4>
+                <pre>
+语义分割 (Semantic Segmentation):
+- 每个点属于哪一类？（地面/树木/建筑）
+- 不区分个体
+
+实例分割 (Instance Segmentation):
+- 每个点属于哪一类 + 哪一个个体？
+- 需要区分"这棵树"和"那棵树"
+- 这正是 Individual Tree Isolation 需要的！
+
+常用方法:
+1. 自上而下 (Top-Down):
+   先检测物体框 → 再分割每个框
+   
+2. 自下而上 (Bottom-Up):
+   先预测每个点的嵌入向量
+   → 相似的点聚类到一起
+   → 形成实例
+            </pre>
+            </div>
+
+            <div class="career-link">
+                实例分割在自动驾驶中用于区分不同的行人、车辆、障碍物——核心能力！
+            </div>
+
+            <h3>🎯 阶段产出</h3>
+            <ul class="checklist">
+                <li>实现 PointNet++ 分割网络</li>
+                <li>在你的森林点云数据上训练</li>
+                <li>完成论文1的实验部分</li>
+            </ul>
+        </section>
+
+        <!-- ====== 路径 B: 边缘部署 ====== -->
+        <div class="phase-header">⚡ 路径 B: 实时处理与边缘部署</div>
+
+        <section class="section">
+            <h2>B.1 阶段一：模型轻量化基础 (M2: 4-6月)</h2>
+
+            <h3>📐 核心原理：为什么需要轻量化？</h3>
+
+            <div class="principle-box">
+                <h4>边缘设备的约束</h4>
+                <pre>
+云端 vs 边缘:
+┌──────────────────────────────────────────────┐
+│ 云端 (服务器)          边缘 (农机/车载)        │
+├──────────────────────────────────────────────┤
+│ GPU: V100/A100         GPU: Jetson (1/10算力) │
+│ 内存: 128GB+           内存: 4-8GB            │
+│ 功耗: 不限             功耗: <30W             │
+│ 延迟: 可接受网络延迟    延迟: 必须 <100ms      │
+│ 网络: 高速             网络: 可能无网络        │
+└──────────────────────────────────────────────┘
+
+轻量化目标:
+1. 减小模型大小 (MB → KB)
+2. 降低计算量 (FLOPs)
+3. 加快推理速度 (ms)
+4. 保持精度损失最小
+            </pre>
+            </div>
+
+            <h3>📐 轻量化方法概览</h3>
+
+            <div class="principle-box">
+                <h4>四种主要方法</h4>
+                <pre>
+1. 模型设计 (Architecture Design)
+   - 使用高效结构: MobileNet, ShuffleNet
+   - 深度可分离卷积
+   
+2. 剪枝 (Pruning)
+   - 移除不重要的权重/通道
+   - 结构化剪枝 vs 非结构化剪枝
+   
+3. 量化 (Quantization) ⭐ 重点
+   - FP32 → FP16 / INT8
+   - 大小减半/1/4，速度提升 2-4x
+   
+4. 知识蒸馏 (Knowledge Distillation)
+   - 大模型(Teacher)指导小模型(Student)
+   - 保留知识，压缩模型
+
+=====================================
+量化原理详解:
+
+原始 (FP32):   权重范围 [-3.14, 2.71, 0.00, ...]
+                每个数字占 32 bit
+
+量化 (INT8):   权重范围 [-128, 127] (整数)
+                每个数字占 8 bit
+                
+转换公式:
+q = round((r - r_min) / scale)
+scale = (r_max - r_min) / 255
+
+好处: 
+- 模型大小减少 4x
+- 整数运算比浮点快
+- 边缘设备友好
+            </pre>
+            </div>
+
+            <div class="career-link">
+                模型量化是久保田这类农机厂商部署感知模型的必备技能——直接命中需求！
+            </div>
+
+            <h3>💻 量化实践代码</h3>
+            <div class="code-block">
+                import torch
+
+                # 1. 动态量化 (最简单)
+                quantized_model = torch.quantization.quantize_dynamic(
+                model,
+                {torch.nn.Linear, torch.nn.Conv1d},
+                dtype=torch.qint8
+                )
+
+                # 2. 静态量化 (更高效)
+                model.qconfig = torch.quantization.get_default_qconfig('fbgemm')
+                torch.quantization.prepare(model, inplace=True)
+                # 用校准数据集推理
+                for data in calibration_loader:
+                model(data)
+                torch.quantization.convert(model, inplace=True)
+
+                # 3. 保存量化模型
+                torch.save(quantized_model.state_dict(), 'model_int8.pth')
+                print(f"原始大小: {original_size} MB")
+                print(f"量化后: {quantized_size} MB")
+            </div>
+        </section>
+
+        <section class="section">
+            <h2>B.2 阶段二：ONNX 导出与跨平台部署 (M2: 7-9月)</h2>
+
+            <h3>📐 核心原理：什么是 ONNX？</h3>
+
+            <div class="principle-box">
+                <h4>ONNX (Open Neural Network Exchange)</h4>
+                <pre>
+问题: 不同框架难以互操作
+┌──────────┐     ┌──────────┐     ┌──────────┐
+│ PyTorch  │  ?  │TensorFlow│  ?  │  Caffe   │
+└──────────┘     └──────────┘     └──────────┘
+
+ONNX 解决方案: 通用中间格式
+┌──────────┐
+│ PyTorch  │──┐
+└──────────┘  │
+┌──────────┐  │    ┌──────────┐    ┌──────────────┐
+│TensorFlow│──┼──▶ │   ONNX   │──▶ │ ONNX Runtime │
+└──────────┘  │    └──────────┘    │ TensorRT     │
+┌──────────┐  │                    │ CoreML       │
+│  Caffe   │──┘                    │ OpenVINO     │
+└──────────┘                       └──────────────┘
+
+好处:
+1. 训练用 PyTorch (方便调试)
+2. 部署用 ONNX Runtime (高效推理)
+3. 一次导出，到处运行
+            </pre>
+            </div>
+
+            <h3>💻 ONNX 导出代码</h3>
+            <div class="code-block">
+                import torch
+                import onnx
+                import onnxruntime as ort
+
+                # 1. 导出 ONNX
+                dummy_input = torch.randn(1, 1024, 3) # (batch, points, xyz)
+                torch.onnx.export(
+                model,
+                dummy_input,
+                "pointnet_tree.onnx",
+                input_names=['point_cloud'],
+                output_names=['predictions'],
+                dynamic_axes={'point_cloud': {1: 'num_points'}}
+                )
+
+                # 2. 验证模型
+                onnx_model = onnx.load("pointnet_tree.onnx")
+                onnx.checker.check_model(onnx_model)
+
+                # 3. 使用 ONNX Runtime 推理
+                session = ort.InferenceSession("pointnet_tree.onnx")
+                outputs = session.run(None, {'point_cloud': point_data})
+
+                # 4. 性能测试
+                import time
+                start = time.time()
+                for _ in range(100):
+                session.run(None, {'point_cloud': point_data})
+                print(f"平均推理时间: {(time.time()-start)/100*1000:.2f} ms")
+            </div>
+
+            <div class="career-link">
+                ONNX 是工业界部署标准，久保田等企业必然使用类似流程！
+            </div>
+        </section>
+
+        <section class="section">
+            <h2>B.3 阶段三：性能优化与 Benchmark (M2: 10-12月)</h2>
+
+            <h3>📐 核心原理：如何评估边缘性能？</h3>
+
+            <div class="principle-box">
+                <h4>边缘部署评估指标</h4>
+                <pre>
+1. 延迟 (Latency)
+   - 单次推理时间 (ms)
+   - 端到端延迟 = 预处理 + 推理 + 后处理
+   - 目标: < 100ms (10 FPS)
+
+2. 吞吐量 (Throughput)
+   - 每秒处理帧数 (FPS)
+   - Batch 处理 vs 单帧处理
+
+3. 内存占用 (Memory)
+   - 模型大小 (MB)
+   - 运行时内存峰值
+
+4. 精度-速度权衡
+   
+       精度 (mIoU)
+         │
+     90% ├────●  原始模型
+         │      ╲
+     88% ├────────●  轻量化
+         │          ╲
+     85% ├────────────●  量化
+         │
+         └──────────────────▶ 速度 (FPS)
+              10    20    40
+            </pre>
+            </div>
+
+            <h3>💻 完整 Benchmark 脚本</h3>
+            <div class="code-block">
+                import time
+                import numpy as np
+                import onnxruntime as ort
+                import torch
+
+                def benchmark_model(model_path, input_shape, num_runs=100):
+                """
+                完整的模型性能评估
+                """
+                results = {}
+
+                # 准备数据
+                dummy_input = np.random.randn(*input_shape).astype(np.float32)
+
+                # ONNX Runtime 测试
+                session = ort.InferenceSession(model_path)
+
+                # 预热
+                for _ in range(10):
+                session.run(None, {'point_cloud': dummy_input})
+
+                # 正式测试
+                latencies = []
+                for _ in range(num_runs):
+                start = time.perf_counter()
+                session.run(None, {'point_cloud': dummy_input})
+                latencies.append((time.perf_counter() - start) * 1000)
+
+                results['mean_latency_ms'] = np.mean(latencies)
+                results['std_latency_ms'] = np.std(latencies)
+                results['fps'] = 1000 / results['mean_latency_ms']
+                results['model_size_mb'] = os.path.getsize(model_path) / 1024 / 1024
+
+                print(f"📊 Benchmark Results:")
+                print(f" Model: {model_path}")
+                print(f" Latency: {results['mean_latency_ms']:.2f} ± {results['std_latency_ms']:.2f} ms")
+                print(f" FPS: {results['fps']:.1f}")
+                print(f" Size: {results['model_size_mb']:.2f} MB")
+
+                return results
+
+                # 对比测试
+                original = benchmark_model("model_fp32.onnx", (1, 4096, 3))
+                quantized = benchmark_model("model_int8.onnx", (1, 4096, 3))
+
+                print(f"\n📈 Speedup: {original['mean_latency_ms']/quantized['mean_latency_ms']:.2f}x")
+                print(f"📉 Size Reduction: {original['model_size_mb']/quantized['model_size_mb']:.2f}x")
+            </div>
+        </section>
+
+        <!-- 论文规划 -->
+        <section class="section">
+            <h2>📄 论文产出规划</h2>
+
+            <table>
+                <tr>
+                    <th>论文</th>
+                    <th>方向</th>
+                    <th>标题建议</th>
+                    <th>时间</th>
+                    <th>目标</th>
+                </tr>
+                <tr>
+                    <td><strong>论文 1</strong></td>
+                    <td>路径 A</td>
+                    <td>PointNet++ for UAV-LiDAR Individual Tree Segmentation</td>
+                    <td>M1 下</td>
+                    <td>日本国内会议</td>
+                </tr>
+                <tr>
+                    <td><strong>论文 2</strong></td>
+                    <td>路径 A+B</td>
+                    <td>Efficient Deep Learning for Real-time Tree Detection: <br>A Quantization Approach</td>
+                    <td>M2 上</td>
+                    <td>Remote Sensing / Forests</td>
+                </tr>
+            </table>
+
+            <div class="highlight-box">
+                <strong>论文 2 的创新点设计：</strong>
+                <ul style="margin-top: 10px; padding-left: 20px;">
+                    <li>将深度学习应用于森林单木分割 (A)</li>
+                    <li>模型量化实现实时处理 (B)</li>
+                    <li>在 CPU 上也能达到 XX FPS</li>
+                    <li>精度仅下降 X%</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- 完整时间线 -->
+        <section class="section">
+            <h2>📅 完整学习时间线</h2>
+
+            <div class="timeline-vertical">
+                <div class="tl-item">
+                    <div class="tl-date">2026.02 (现在)</div>
+                    <div class="tl-title">ITI 基础入门</div>
+                    <div class="tl-content">DBSCAN、CloudCompare、传统方法理解</div>
+                </div>
+                <div class="tl-item">
+                    <div class="tl-date">2026.04-06</div>
+                    <div class="tl-title">深度学习基础 (A.1)</div>
+                    <div class="tl-content">PyTorch、MLP、CNN、反向传播原理</div>
+                </div>
+                <div class="tl-item">
+                    <div class="tl-date">2026.07-09</div>
+                    <div class="tl-title">PointNet 系列 (A.2)</div>
+                    <div class="tl-content">PointNet 实现、ModelNet40 训练</div>
+                </div>
+                <div class="tl-item">
+                    <div class="tl-date">2026.10-12</div>
+                    <div class="tl-title">PointNet++ 与论文1 (A.3)</div>
+                    <div class="tl-content">实例分割、森林数据训练、论文撰写</div>
+                </div>
+                <div class="tl-item">
+                    <div class="tl-date">2027.01-03</div>
+                    <div class="tl-title">论文1投稿 + 日语N1</div>
+                    <div class="tl-content">国内会议投稿、语言考试</div>
+                </div>
+                <div class="tl-item">
+                    <div class="tl-date">2027.04-06</div>
+                    <div class="tl-title">模型轻量化 (B.1)</div>
+                    <div class="tl-content">量化、剪枝、知识蒸馏原理与实践</div>
+                </div>
+                <div class="tl-item">
+                    <div class="tl-date">2027.07-09</div>
+                    <div class="tl-title">ONNX 部署 (B.2)</div>
+                    <div class="tl-content">模型导出、Runtime 优化、论文2撰写</div>
+                </div>
+                <div class="tl-item">
+                    <div class="tl-date">2027.10-12</div>
+                    <div class="tl-title">论文2 + 就职 (B.3)</div>
+                    <div class="tl-content">Benchmark、投稿、久保田面试</div>
+                </div>
+                <div class="tl-item">
+                    <div class="tl-date">2028.01-03</div>
+                    <div class="tl-title">毕业</div>
+                    <div class="tl-content">毕业论文、入社准备</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 资源清单 -->
+        <section class="section">
+            <h2>📚 学习资源索引</h2>
+
+            <h3>路径 A: 深度学习</h3>
+            <ul>
+                <li><strong>书籍</strong>: 《动手学深度学习》李沐</li>
+                <li><strong>课程</strong>: Stanford CS231n (CNN), Stanford CS224W (图神经网络)</li>
+                <li><strong>论文</strong>: PointNet (2017), PointNet++ (2017), DGCNN (2019)</li>
+                <li><strong>代码</strong>: <a
+                        href="https://github.com/yanx27/Pointnet_Pointnet2_pytorch">Pointnet_Pointnet2_pytorch</a></li>
+            </ul>
+
+            <h3>路径 B: 边缘部署</h3>
+            <ul>
+                <li><strong>官方文档</strong>: ONNX Runtime, PyTorch Quantization</li>
+                <li><strong>教程</strong>: NVIDIA TensorRT 入门</li>
+                <li><strong>论文</strong>: MobileNet, ShuffleNet, EfficientNet</li>
+            </ul>
+        </section>
+
+    </div>
+
+    <footer>
+        <p>🎯 路径 A+B = 2篇论文 + 最强久保田竞争力</p>
+        <p>每一行代码都是通向农机自动驾驶的阶梯 🌲→⚡→🚜</p>
+    </footer>
+
+    <script>
+        // Tab 切换功能
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabId = tab.dataset.tab;
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+    </script>
+
+</body>
+
+</html>
