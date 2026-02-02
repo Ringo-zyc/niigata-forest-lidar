@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/Version-2.1-green)
+![Version](https://img.shields.io/badge/Version-2.2-green)
 ![Python](https://img.shields.io/badge/Python-3.11+-blue)
 ![License](https://img.shields.io/badge/License-Academic-orange)
 
@@ -48,13 +48,13 @@ cd /Users/zyc/Downloads/Niigata_Research_Prep
 
 ## ✨ Features
 
-| Feature | Description | Tool |
+|Feature | Description | Tool |
 |---------|-------------|------|
-| **GUI Interface** | Tabbed design, integrated detection + visualization | `gui_app.py` |
-| **CLI Detection** | Batch processing without interface | `detect_cylinders_v2.py` |
-| **3D Visualization** | Matplotlib static plots + Open3D interactive | `visualize_forest.py` |
-| **Accuracy Validation** | Stratified sampling + RMSE/MAE calculation | `generate_validation_sample.py` |
-| **Biomass Analysis** | Diameter distribution, carbon stock estimation | `analyze_forest_data.py` |
+| **GUI Interface** | Tabbed design, integrated detection + visualization | `tools/gui_app.py` |
+| **CLI Detection** | Batch processing without interface | `core/detect_cylinders_v2.py` |
+| **3D Visualization** | Matplotlib static plots + Open3D interactive | `tools/visualize_forest.py` |
+| **Accuracy Validation** | Stratified sampling + RMSE/MAE calculation | `tools/generate_validation_sample.py` |
+| **Biomass Analysis** | Diameter distribution, carbon stock estimation | `analysis/analyze_forest_data.py` |
 
 ---
 
@@ -63,33 +63,30 @@ cd /Users/zyc/Downloads/Niigata_Research_Prep
 ```
 Niigata_Research_Prep/
 ├── 00_Raw_Data/                    # Raw LiDAR Data (.laz)
-│   ├── SJFE_final_ULS.laz         # San Juan Fault (1.1GB)
-│   └── SL_Winter2021_*.laz        # StREAM Lab (473MB)
 │
 ├── 01_Processed/                   # Processed Point Clouds
-│   ├── San Juan Fault/            # Main Research Area
-│   └── StREAM Lab/                # Auxiliary Validation Area
 │
 ├── 02_Screenshots/                 # Learning Process Screenshots
-│   └── failures/                  # Failure cases (for Deep Learning data engineering)
 │
 ├── 03_Scripts/                     # 🐍 Core Scripts
 │   ├── run.sh                     # Unified Entry Point
-│   ├── gui_app.py                 # GUI Main Program
-│   ├── tree_utils.py              # RANSAC Algorithm Core
-│   ├── detect_cylinders_v2.py     # CLI Detection
-│   ├── visualize_forest.py        # Visualization Generation
-│   └── MANUAL.md                  # Tool Manual
+│   ├── core/                      # Core Algorithms
+│   │   ├── tree_utils.py          # RANSAC Algorithm Core
+│   │   └── detect_cylinders_v2.py # CLI Detection
+│   ├── pipelines/                 # Full Pipelines
+│   ├── tools/                     # Tools & Visualization
+│   │   ├── gui_app.py             # GUI Main Program
+│   │   └── visualize_forest.py    # Visualization Generation
+│   ├── analysis/                  # Data Analysis
+│   └── experiments/               # Experiments
 │
 ├── 04_Results/                     # Output Results
 │   ├── figures/                   # Figures (.png)
-│   ├── tables/                    # Data Tables (.csv)
-│   └── reports/                   # 📅 Planning & Learning Docs
-│       ├── path_ab_learning_plan.html      # Deep Learning Roadmap
-│       ├── iti_learning_summary.md         # Short-term Learning Summary
-│       └── graduate_career_roadmap.html    # 2-Year Career Roadmap
+│   └── tables/                    # Data Tables (.csv)
 │
 ├── docs/                           # 📚 Core Project Documentation
+│   ├── technical/                 # Technical Docs & Structure
+│   ├── reports/                   # 📅 Reports & Career Planning
 │   ├── research_master_guideline.html  # 🏆 Master Research Guideline (Entry)
 │   └── career_skill_mapping.md         # Skill-Career Mapping
 │
@@ -121,11 +118,12 @@ Niigata_Research_Prep/
 ### Method 2: Command Line
 
 ```bash
+```bash
 # Detection
-python 03_Scripts/detect_cylinders_v2.py
+python 03_Scripts/core/detect_cylinders_v2.py
 
 # Visualization
-python 03_Scripts/visualize_forest.py <path_to_ply>
+python 03_Scripts/tools/visualize_forest.py <path_to_ply>
 ```
 
 ---
@@ -148,7 +146,7 @@ python 03_Scripts/visualize_forest.py <path_to_ply>
 ### 1. Generate Stratified Sampling Table
 
 ```bash
-python 03_Scripts/generate_validation_sample.py
+python 03_Scripts/tools/generate_validation_sample.py
 ```
 
 Output: `validation_sample.csv` (9 trees sampled by DBH size)
@@ -160,7 +158,7 @@ Locate each tree using coordinates, manually measure diameter, and fill in `Manu
 ### 3. Calculate Error Statistics
 
 ```bash
-python 03_Scripts/calculate_validation_stats.py
+python 03_Scripts/analysis/calculate_validation_stats.py
 ```
 
 Output: RMSE, MAE, Mean Error, etc.
