@@ -55,15 +55,15 @@ MODE="${1:-gui}"
 case "$MODE" in
     gui)
         echo "🚀 Starting GUI..."
-        "$PYTHON_CMD" "$SCRIPT_DIR/gui_app.py"
+        "$PYTHON_CMD" "$SCRIPT_DIR/tools/gui_app.py"
         ;;
     detect)
         echo "🔍 Starting CLI Detection..."
-        "$PYTHON_CMD" "$SCRIPT_DIR/detect_cylinders_v2.py" "$2"
+        "$PYTHON_CMD" "$SCRIPT_DIR/core/detect_cylinders_v2.py" "$2"
         ;;
     visualize)
         echo "📊 Starting Visualization..."
-        "$PYTHON_CMD" "$SCRIPT_DIR/visualize_forest.py" "$2"
+        "$PYTHON_CMD" "$SCRIPT_DIR/tools/visualize_forest.py" "$2"
         ;;
     help|--help|-h)
         echo "Usage: ./run.sh [command]"

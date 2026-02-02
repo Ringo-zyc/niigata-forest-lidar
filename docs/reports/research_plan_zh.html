@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <title>研究计划书</title>
+    <style>
+        @page {
+            margin: 1.5cm;
+            size: A4;
+        }
+
+        body {
+            font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 20px;
+            font-size: 11px;
+        }
+
+        h1 {
+            font-size: 16px;
+            text-align: center;
+            border-bottom: 2px solid #333;
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+        }
+
+        h2 {
+            font-size: 12px;
+            background: #1565c0;
+            color: white;
+            padding: 4px 10px;
+            margin: 12px 0 8px 0;
+        }
+
+        .info {
+            text-align: right;
+            font-size: 10px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            margin: 6px 0;
+            text-align: justify;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 8px 0;
+            font-size: 10px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 5px 8px;
+        }
+
+        th {
+            background: #f5f5f5;
+            text-align: center;
+            width: 20%;
+        }
+
+        td {
+            text-align: left;
+        }
+
+        .highlight {
+            background: #e3f2fd;
+            padding: 8px;
+            border-left: 3px solid #1565c0;
+            margin: 10px 0;
+        }
+
+        ul {
+            margin: 5px 0;
+            padding-left: 20px;
+        }
+
+        li {
+            margin: 3px 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>研究计划书</h1>
+
+    <div class="info">
+        姓名: __________ <br>
+        提交日期: 2026年2月
+    </div>
+
+    <h2>1. 研究课题</h2>
+    <p><strong>基于深度学习的 UAV-LiDAR 点云单木分离方法研究</strong></p>
+
+    <h2>2. 研究背景与目的</h2>
+    <p>
+        森林资源的精准调查对于可持续森林管理和碳汇估算至关重要。
+        近年来，无人机搭载激光雷达（UAV-LiDAR）技术在森林测量中广泛应用，
+        但从获取的点云数据中分离单棵树木（Individual Tree Isolation, ITI）仍面临挑战。
+    </p>
+    <p>
+        通过预研实验，我使用传统方法（DBSCAN、TreeISO）进行单木分离测试，发现以下问题：
+    </p>
+    <ul>
+        <li>不同场景需要手动调整参数</li>
+        <li>树冠交叠区域分割精度较低</li>
+        <li>不同扫描平台（TLS/UAV）的算法兼容性差</li>
+    </ul>
+    <p>
+        本研究拟<strong>利用深度学习开发新的单木分离方法</strong>，解决上述问题。
+    </p>
+
+    <h2>3. 研究方法</h2>
+    <p>以点云深度学习（PointNet++等）为基础，将实例分割技术应用于森林点云处理：</p>
+    <ul>
+        <li>调研现有点云处理网络（PointNet++、RandLA-Net 等）</li>
+        <li>针对森林场景改进网络结构</li>
+        <li>利用树木形态特征（垂直生长模式等）设计特征</li>
+        <li>与传统方法进行定量精度对比</li>
+    </ul>
+
+    <h2>4. 预期成果</h2>
+    <div class="highlight">
+        <strong>目标:</strong> 将单木检测精度从传统方法的 70-85% 提升至 <strong>90% 以上</strong>，
+        并消除手动参数调整，实现通用化处理。
+    </div>
+
+    <h2>5. 研究计划</h2>
+    <table>
+        <tr>
+            <th>时间</th>
+            <th>内容</th>
+        </tr>
+        <tr>
+            <td>M1 上学期</td>
+            <td>文献调研、深度学习基础学习、数据收集与预处理</td>
+        </tr>
+        <tr>
+            <td>M1 下学期</td>
+            <td>基线模型实现、初步实验</td>
+        </tr>
+        <tr>
+            <td>M2 上学期</td>
+            <td>方法改进、对比实验、准备学会发表</td>
+        </tr>
+        <tr>
+            <td>M2 下学期</td>
+            <td>论文撰写、完成硕士论文</td>
+        </tr>
+    </table>
+
+    <h2>6. 与实验室研究的关联</h2>
+    <p>
+        本研究与村上研究室的森林资源监测、环境计测研究方向密切相关。
+        计划利用研究室积累的 UAV-LiDAR 数据，为森林调查（NFI）数据处理的自动化做出贡献。
+        同时，本研究成果未来可拓展至农业领域应用。
+    </p>
+
+</body>
+
+</html>

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>研究計画書 - 朱 躍成</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 0;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: #eee;
+            font-family: "Yu Gothic", "YuGothic", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+            color: #333;
+            line-height: 1.4;
+        }
+
+        .page {
+            width: 210mm;
+            height: 296mm;
+            padding: 12mm 15mm;
+            margin: 10mm auto;
+            background: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @media print {
+            body {
+                background: white;
+                -webkit-print-color-adjust: exact;
+            }
+
+            .page {
+                margin: 0;
+                box-shadow: none;
+                width: 100%;
+                height: auto;
+                page-break-after: always;
+                padding: 12mm 15mm;
+            }
+        }
+
+        /* Typography */
+        h1 {
+            font-size: 18pt;
+            margin-bottom: 15px;
+            text-align: center;
+            border-bottom: 2px solid #333;
+            padding-bottom: 8px;
+            margin-top: 0;
+        }
+
+        h2 {
+            font-size: 12pt;
+            margin-top: 12px;
+            margin-bottom: 8px;
+            border-left: 5px solid #2e7d32;
+            padding-left: 8px;
+            background: #f1f8e9;
+            padding-top: 2px;
+            padding-bottom: 2px;
+            color: #1b5e20;
+        }
+
+        h3 {
+            font-size: 11pt;
+            margin-top: 8px;
+            margin-bottom: 4px;
+            font-weight: bold;
+            color: #444;
+        }
+
+        p,
+        li,
+        td {
+            font-size: 9.5pt;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 8px;
+        }
+
+        th,
+        td {
+            border: 1px solid #cbd5e1;
+            padding: 4px 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f1f5f9;
+            width: 18%;
+            font-weight: bold;
+            color: #334155;
+        }
+
+        /* Lists */
+        ul {
+            padding-left: 18px;
+            margin-top: 2px;
+            margin-bottom: 8px;
+        }
+
+        li {
+            margin-bottom: 2px;
+        }
+
+        /* Specifics */
+        .highlight {
+            font-weight: bold;
+            color: #2e7d32;
+        }
+
+        .goal-box {
+            background: #e8f5e9;
+            border-left: 4px solid #2e7d32;
+            padding: 8px 12px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page">
+        <h1>研究計画書</h1>
+
+        <!-- 基本情報 -->
+        <h2>基本情報</h2>
+        <table>
+            <tr>
+                <th>氏名</th>
+                <td>朱 躍成（シュウ ヤクセイ）</td>
+            </tr>
+            <tr>
+                <th>研究テーマ</th>
+                <td><strong>深層学習を用いたUAV-LiDAR点群からの個別樹木分離手法の開発</strong></td>
+            </tr>
+        </table>
+
+        <!-- 研究背景と目的 -->
+        <h2>研究背景と目的</h2>
+        <p>
+            森林資源の正確な把握は、持続可能な森林管理や炭素吸収量推定において極めて重要です。
+            近年、UAV搭載LiDARによる効率的な森林計測が普及していますが、取得した点群データから
+            個別の樹木を分離する処理（Individual Tree Isolation, ITI）には依然として課題があります。
+        </p>
+        <p>予備実験として、従来手法（DBSCAN、TreeISO）を用いた分離を実施した結果、以下の課題を確認しました：</p>
+        <ul>
+            <li>シーンごとにパラメータの手動調整が必要</li>
+            <li>樹冠が重なる領域での分割精度が低い</li>
+            <li>異なるスキャンプラットフォーム（TLS/UAV）間でアルゴリズムの互換性が低い</li>
+        </ul>
+        <p>本研究では、<span class="highlight">深層学習を活用した新しい個別樹木分離手法</span>を開発し、上記課題の解決を目指します。</p>
+
+        <!-- 研究手法 -->
+        <h2>研究手法</h2>
+        <p>点群データに対する深層学習（PointNet++等）を基盤とし、インスタンスセグメンテーション技術を森林点群に適用します：</p>
+        <ul>
+            <li>既存の点群処理ネットワーク（PointNet++, RandLA-Net等）の調査・比較</li>
+            <li>森林シーン向けのネットワーク構造の改良</li>
+            <li>樹木の形状特性（垂直成長パターン等）を活かした特徴設計</li>
+            <li>従来手法との定量的な精度比較</li>
+        </ul>
+
+        <!-- 期待される成果 -->
+        <h2>期待される成果</h2>
+        <div class="goal-box">
+            <strong>目標:</strong> 個別樹木検出精度を従来手法（70-85%）から <span class="highlight">90%以上</span> に向上させ、
+            手動パラメータ調整を不要にする汎用的な手法を確立する。
+        </div>
+
+        <!-- 研究スケジュール -->
+        <h2>研究スケジュール</h2>
+        <table>
+            <tr>
+                <th>時期</th>
+                <th>内容</th>
+            </tr>
+            <tr>
+                <td>M1前期</td>
+                <td>文献調査、深層学習基礎の習得、データ収集・前処理</td>
+            </tr>
+            <tr>
+                <td>M1後期</td>
+                <td>ベースラインモデルの実装、初期実験</td>
+            </tr>
+            <tr>
+                <td>M2前期</td>
+                <td>手法改良、比較実験、学会発表準備</td>
+            </tr>
+            <tr>
+                <td>M2後期</td>
+                <td>論文執筆、修士論文完成</td>
+            </tr>
+        </table>
+
+        <!-- 志望研究との関連 -->
+        <h2>本研究室との関連</h2>
+        <table>
+            <tr>
+                <th>卒業研究の経験</th>
+                <th>志望研究（点群処理）への応用</th>
+            </tr>
+            <tr>
+                <td>リモートセンシング画像解析</td>
+                <td>UAV・LiDARによる点群データ解析</td>
+            </tr>
+            <tr>
+                <td>深層学習モデルの改良・実装</td>
+                <td>点群処理のための深層学習手法</td>
+            </tr>
+            <tr>
+                <td>セマンティックセグメンテーション</td>
+                <td>Individual-Tree Isolationへの拡張</td>
+            </tr>
+        </table>
+    </div>
+</body>
+
+</html>

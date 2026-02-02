@@ -11,11 +11,12 @@ from datetime import datetime
 
 # 添加脚本目录到路径
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-if SCRIPT_DIR not in sys.path:
-    sys.path.insert(0, SCRIPT_DIR)
+PARENT_DIR = os.path.dirname(SCRIPT_DIR)
+if PARENT_DIR not in sys.path:
+    sys.path.insert(0, PARENT_DIR)
 
-from tree_isolation_dbscan import load_point_cloud, isolate_trees_dbscan, save_isolated_trees, visualize_isolated_trees
-from measure_isolated_tree import batch_measure_trees
+from core.tree_isolation_dbscan import load_point_cloud, isolate_trees_dbscan, save_isolated_trees, visualize_isolated_trees
+from analysis.measure_isolated_tree import batch_measure_trees
 
 
 def run_full_pipeline(

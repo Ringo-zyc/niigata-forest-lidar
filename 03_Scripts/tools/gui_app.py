@@ -8,12 +8,16 @@ import threading
 import sys
 
 # Import shared logic from local module
+# Import shared logic from core module
 try:
-    from tree_utils import detect_cylinders
+    from core.tree_utils import detect_cylinders
 except ImportError:
     # Handle case if run from outside directory without PYTHONPATH
-    sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-    from tree_utils import detect_cylinders
+    SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+    PARENT_DIR = os.path.dirname(SCRIPT_DIR)
+    if PARENT_DIR not in sys.path:
+        sys.path.append(PARENT_DIR)
+    from core.tree_utils import detect_cylinders
 
 try:
     from visualize_forest import run_visualization, run_interactive_visualization

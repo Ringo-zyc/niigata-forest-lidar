@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>单木分离实验工作流程</title>
+    <style>
+        :root {
+            --primary: #2d5a27;
+            --secondary: #1a5f7a;
+            --accent: #e67e22;
+            --python: #3776ab;
+            --cc: #ff6b35;
+            --bg: #f8f9fa;
+            --card: #ffffff;
+            --text: #2c3e50;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans SC', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.8;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 2em;
+        }
+
+        .section {
+            background: var(--card);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .section h2 {
+            color: var(--primary);
+            border-left: 4px solid var(--accent);
+            padding-left: 15px;
+            margin-bottom: 20px;
+        }
+
+        .section h3 {
+            color: var(--secondary);
+            margin: 20px 0 10px 0;
+        }
+
+        /* Tool Tags */
+        .tool-tag {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        .tool-python {
+            background: #e8f4fc;
+            color: var(--python);
+            border: 1px solid var(--python);
+        }
+
+        .tool-cc {
+            background: #fff0eb;
+            color: var(--cc);
+            border: 1px solid var(--cc);
+        }
+
+        .tool-both {
+            background: #f0f0f0;
+            color: #666;
+            border: 1px solid #999;
+        }
+
+        /* Data Flow */
+        .data-flow {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+            background: linear-gradient(135deg, #e8f5e9, #e3f2fd);
+            border-radius: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .data-box {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            min-width: 150px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .data-box.input {
+            border-top: 4px solid var(--primary);
+        }
+
+        .data-box.process {
+            border-top: 4px solid var(--secondary);
+        }
+
+        .data-box.output {
+            border-top: 4px solid var(--accent);
+        }
+
+        .data-arrow {
+            font-size: 1.5em;
+            color: var(--secondary);
+        }
+
+        /* Step Cards */
+        .step-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px 0;
+            position: relative;
+        }
+
+        .step-card.python {
+            border-left: 5px solid var(--python);
+        }
+
+        .step-card.cc {
+            border-left: 5px solid var(--cc);
+        }
+
+        .step-number {
+            position: absolute;
+            top: -12px;
+            left: 20px;
+            background: var(--secondary);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .step-card.python .step-number {
+            background: var(--python);
+        }
+
+        .step-card.cc .step-number {
+            background: var(--cc);
+        }
+
+        .step-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        /* Code Block */
+        .code-block {
+            background: #1e3a5f;
+            color: #a8d8ea;
+            padding: 15px 20px;
+            border-radius: 10px;
+            font-family: 'SF Mono', monospace;
+            font-size: 0.85em;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        th {
+            background: var(--bg);
+            color: var(--primary);
+        }
+
+        /* Info Box */
+        .info-box {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 4px solid var(--secondary);
+            padding: 15px 20px;
+            border-radius: 0 10px 10px 0;
+            margin: 15px 0;
+        }
+
+        .warning-box {
+            background: linear-gradient(135deg, #fff3cd, #ffeeba);
+            border-left: 4px solid var(--accent);
+            padding: 15px 20px;
+            border-radius: 0 10px 10px 0;
+            margin: 15px 0;
+        }
+
+        .success-box {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            border-left: 4px solid var(--primary);
+            padding: 15px 20px;
+            border-radius: 0 10px 10px 0;
+            margin: 15px 0;
+        }
+
+        /* Output Format */
+        .output-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .output-card {
+            background: var(--bg);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .output-card h4 {
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .output-card code {
+            background: #e0e0e0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.85em;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #999;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>🌲 单木分离实验工作流程</h1>
+            <p>工具使用 • 数据流转 • 分析方法 完整指南</p>
+        </header>
+
+        <!-- Dataset Confirmation -->
+        <section class="section">
+            <h2>📂 确认数据集</h2>
+            <div class="success-box">
+                <strong>✅ 使用数据集：</strong><br>
+                <code>01_Processed/San Juan Fault/Off-Ground_Good-5m.ply</code><br>
+                这是已去除地面点的非地面点云，包含树木、灌木等植被。
+            </div>
+
+            <h3>数据特点</h3>
+            <table>
+                <tr>
+                    <th>属性</th>
+                    <th>值</th>
+                    <th>说明</th>
+                </tr>
+                <tr>
+                    <td>格式</td>
+                    <td>.ply</td>
+                    <td>通用点云格式，Python 和 CC 都支持</td>
+                </tr>
+                <tr>
+                    <td>内容</td>
+                    <td>非地面点</td>
+                    <td>已用 CSF 滤波去除地面</td>
+                </tr>
+                <tr>
+                    <td>区域</td>
+                    <td>针叶林</td>
+                    <td>树干圆柱形明显</td>
+                </tr>
+            </table>
+        </section>
+
+        <!-- Tool Legend -->
+        <section class="section">
+            <h2>🔧 工具图例</h2>
+            <p>
+                <span class="tool-tag tool-python">🐍 Python</span> 脚本自动化处理<br>
+                <span class="tool-tag tool-cc">📐 CloudCompare</span> 可视化 + 手动验证<br>
+                <span class="tool-tag tool-both">🔄 两者皆可</span>
+            </p>
+
+            <div class="info-box">
+                <strong>分工原则：</strong><br>
+                • <strong>Python</strong>：批量处理、算法运行、数据导出、生成图表<br>
+                • <strong>CloudCompare</strong>：交互式查看、手动测量验证、截图保存
+            </div>
+        </section>
+
+        <!-- Overall Data Flow -->
+        <section class="section">
+            <h2>📊 整体数据流</h2>
+
+            <div class="data-flow">
+                <div class="data-box input">
+                    <div>📥</div>
+                    <strong>输入</strong>
+                    <div style="font-size:0.8em">.ply 点云</div>
+                </div>
+                <div class="data-arrow">→</div>
+                <div class="data-box process">
+                    <div>⚙️</div>
+                    <strong>分割算法</strong>
+                    <div style="font-size:0.8em">DBSCAN / Treeiso</div>
+                </div>
+                <div class="data-arrow">→</div>
+                <div class="data-box output">
+                    <div>📤</div>
+                    <strong>输出</strong>
+                    <div style="font-size:0.8em">.csv + .ply + .png</div>
+                </div>
+            </div>
+
+            <h3>输出文件类型</h3>
+            <div class="output-grid">
+                <div class="output-card">
+                    <h4>📊 CSV 数据表</h4>
+                    <p>每棵树一行，包含：</p>
+                    <ul style="font-size:0.9em; padding-left:20px;">
+                        <li>树木编号 (Tree_ID)</li>
+                        <li>中心坐标 (X, Y, Z)</li>
+                        <li>点数 (Num_Points)</li>
+                        <li>DBH（如果测量）</li>
+                    </ul>
+                </div>
+                <div class="output-card">
+                    <h4>🌲 PLY 点云</h4>
+                    <p>带标签的点云文件：</p>
+                    <ul style="font-size:0.9em; padding-left:20px;">
+                        <li>每个点有 label 属性</li>
+                        <li>相同 label = 同一棵树</li>
+                        <li>可在 CC 中彩色显示</li>
+                    </ul>
+                </div>
+                <div class="output-card">
+                    <h4>🖼️ PNG 图表</h4>
+                    <p>可视化结果：</p>
+                    <ul style="font-size:0.9em; padding-left:20px;">
+                        <li>3D 散点图</li>
+                        <li>俯视图（2D 投影）</li>
+                        <li>对比图表</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Phase 1: DBSCAN -->
+        <section class="section">
+            <h2>🔵 阶段 1: DBSCAN 聚类</h2>
+
+            <div class="step-card python">
+                <div class="step-number">1</div>
+                <div class="step-title"><span class="tool-tag tool-python">🐍 Python</span> 运行 DBSCAN 脚本</div>
+                <div class="code-block">cd /Users/zyc/Downloads/Niigata_Research_Prep
+                    python 03_Scripts/tree_isolation_dbscan.py</div>
+                <p><strong>脚本做什么：</strong></p>
+                <ol style="padding-left: 20px; font-size: 0.9em;">
+                    <li>读取 .ply 文件</li>
+                    <li>将 3D 点投影到 2D（XY 平面）</li>
+                    <li>运行 DBSCAN 聚类</li>
+                    <li>为每个点分配树木编号</li>
+                    <li>保存结果 + 生成可视化</li>
+                </ol>
+            </div>
+
+            <div class="step-card python">
+                <div class="step-number">2</div>
+                <div class="step-title"><span class="tool-tag tool-python">🐍 Python</span> 查看输出</div>
+                <p><strong>输出文件位置：</strong></p>
+                <div class="code-block">04_Results/
+                    ├── dbscan_labels.ply # 带标签的点云
+                    ├── dbscan_tree_stats.csv # 每棵树的统计
+                    └── figures/
+                    └── dbscan_result.png # 可视化图</div>
+            </div>
+
+            <div class="step-card cc">
+                <div class="step-number">3</div>
+                <div class="step-title"><span class="tool-tag tool-cc">📐 CloudCompare</span> 检查分割效果</div>
+                <ol style="padding-left: 20px; font-size: 0.9em;">
+                    <li>打开 <code>04_Results/dbscan_labels.ply</code></li>
+                    <li>右键点云 → <strong>Edit colors</strong> → <strong>From scalar field</strong></li>
+                    <li>选择 <code>label</code> 字段 → 显示彩色分割</li>
+                    <li>旋转查看，找到失败案例</li>
+                    <li><strong>截图保存</strong>到 <code>02_Screenshots/</code></li>
+                </ol>
+            </div>
+
+            <div class="warning-box">
+                <strong>🔍 重点记录：失败案例！</strong><br>
+                • <strong>欠分割</strong>：多棵树被合并成一棵（同一个颜色）<br>
+                • <strong>过分割</strong>：一棵树被分成多个颜色<br>
+                • 截图保存到 <code>02_Screenshots/failures/</code>
+            </div>
+        </section>
+
+        <!-- Phase 2: Treeiso -->
+        <section class="section">
+            <h2>🟢 阶段 2: Treeiso 图割</h2>
+
+            <div class="step-card python">
+                <div class="step-number">1</div>
+                <div class="step-title"><span class="tool-tag tool-python">🐍 Python</span> 安装 Treeiso</div>
+                <div class="code-block">pip install treeiso</div>
+                <p style="color: #666; font-size: 0.9em;">如果安装失败，可能需要从 GitHub 克隆源码安装。</p>
+            </div>
+
+            <div class="step-card python">
+                <div class="step-number">2</div>
+                <div class="step-title"><span class="tool-tag tool-python">🐍 Python</span> 运行 Treeiso 分割</div>
+                <div class="code-block">python 03_Scripts/treeiso_wrapper.py</div>
+                <p><strong>Treeiso 做什么：</strong></p>
+                <ol style="padding-left: 20px; font-size: 0.9em;">
+                    <li>构建点云的图结构（每个点是节点）</li>
+                    <li>计算边权重（相邻点的相似度）</li>
+                    <li>用最小割算法找最优分割边界</li>
+                    <li>输出每个点的树木标签</li>
+                </ol>
+            </div>
+
+            <div class="step-card cc">
+                <div class="step-number">3</div>
+                <div class="step-title"><span class="tool-tag tool-cc">📐 CloudCompare</span> 对比效果</div>
+                <p>同时打开 DBSCAN 和 Treeiso 的结果，对比：</p>
+                <ul style="padding-left: 20px; font-size: 0.9em;">
+                    <li>树冠交叠处的分割效果</li>
+                    <li>边缘树木的处理</li>
+                    <li>噪声点的分类</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Phase 3: Comparison -->
+        <section class="section">
+            <h2>🟠 阶段 3: 方法对比分析</h2>
+
+            <div class="step-card python">
+                <div class="step-number">1</div>
+                <div class="step-title"><span class="tool-tag tool-python">🐍 Python</span> 生成对比表</div>
+                <div class="code-block">python 03_Scripts/compare_iti_methods.py</div>
+                <p><strong>对比指标：</strong></p>
+                <table>
+                    <tr>
+                        <th>指标</th>
+                        <th>含义</th>
+                    </tr>
+                    <tr>
+                        <td>检测树木数</td>
+                        <td>分割出多少棵独立的树</td>
+                    </tr>
+                    <tr>
+                        <td>噪声点比例</td>
+                        <td>未被分配到任何树的点</td>
+                    </tr>
+                    <tr>
+                        <td>平均每棵树点数</td>
+                        <td>树木大小的指标</td>
+                    </tr>
+                    <tr>
+                        <td>处理时间</td>
+                        <td>算法效率</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="step-card python">
+                <div class="step-number">2</div>
+                <div class="step-title"><span class="tool-tag tool-python">🐍 Python</span> 生成可视化图表</div>
+                <p>输出到 <code>04_Results/figures/</code>：</p>
+                <ul style="padding-left: 20px;">
+                    <li>柱状图：检测数量对比</li>
+                    <li>饼图：噪声点分布</li>
+                    <li>并排图：DBSCAN vs Treeiso 俯视图</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Summary Table -->
+        <section class="section">
+            <h2>📋 工具使用总结</h2>
+
+            <table>
+                <tr>
+                    <th>任务</th>
+                    <th>工具</th>
+                    <th>输入</th>
+                    <th>输出</th>
+                </tr>
+                <tr>
+                    <td>DBSCAN 聚类</td>
+                    <td><span class="tool-tag tool-python">🐍</span></td>
+                    <td>.ply</td>
+                    <td>.ply + .csv + .png</td>
+                </tr>
+                <tr>
+                    <td>Treeiso 分割</td>
+                    <td><span class="tool-tag tool-python">🐍</span></td>
+                    <td>.ply</td>
+                    <td>.ply + .csv</td>
+                </tr>
+                <tr>
+                    <td>结果可视化</td>
+                    <td><span class="tool-tag tool-cc">📐</span></td>
+                    <td>.ply (带标签)</td>
+                    <td>截图 .png</td>
+                </tr>
+                <tr>
+                    <td>手动验证 DBH</td>
+                    <td><span class="tool-tag tool-cc">📐</span></td>
+                    <td>单棵树 .ply</td>
+                    <td>测量值</td>
+                </tr>
+                <tr>
+                    <td>对比分析</td>
+                    <td><span class="tool-tag tool-python">🐍</span></td>
+                    <td>多个 .csv</td>
+                    <td>图表 .png</td>
+                </tr>
+                <tr>
+                    <td>失败案例记录</td>
+                    <td><span class="tool-tag tool-cc">📐</span></td>
+                    <td>分割结果</td>
+                    <td>截图 + 笔记</td>
+                </tr>
+            </table>
+        </section>
+
+        <!-- Next Steps -->
+        <section class="section">
+            <h2>🚀 现在开始</h2>
+
+            <div class="success-box">
+                <strong>第一步：运行 DBSCAN</strong><br>
+                我们将先运行 DBSCAN 脚本，确认它能正常工作，然后再安装 Treeiso。
+            </div>
+
+            <p>准备好后，我将为您：</p>
+            <ol style="padding-left: 20px;">
+                <li>检查 DBSCAN 脚本是否配置正确</li>
+                <li>运行脚本并查看输出</li>
+                <li>帮您在 CloudCompare 中查看结果</li>
+            </ol>
+        </section>
+    </div>
+
+    <footer>
+        单木分离实验工作流程 | 2026-01-31
+    </footer>
+</body>
+
+</html>

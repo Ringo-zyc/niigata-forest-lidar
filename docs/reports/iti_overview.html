@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>单木分离学习全景图</title>
+    <style>
+        :root {
+            --primary: #2d5a27;
+            --secondary: #1a5f7a;
+            --accent: #e67e22;
+            --bg: #f8f9fa;
+            --card: #ffffff;
+            --text: #2c3e50;
+            --text-light: #7f8c8d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans SC', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.8;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            opacity: 0.9;
+        }
+
+        .section {
+            background: var(--card);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .section h2 {
+            color: var(--primary);
+            border-left: 4px solid var(--accent);
+            padding-left: 15px;
+            margin-bottom: 20px;
+        }
+
+        .section h3 {
+            color: var(--secondary);
+            margin: 20px 0 10px 0;
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding: 20px 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(to bottom, var(--primary), var(--secondary), var(--accent));
+            border-radius: 2px;
+        }
+
+        .timeline-item {
+            display: flex;
+            margin-bottom: 30px;
+        }
+
+        .timeline-item:nth-child(odd) {
+            flex-direction: row;
+        }
+
+        .timeline-item:nth-child(even) {
+            flex-direction: row-reverse;
+        }
+
+        .timeline-content {
+            width: 45%;
+            background: var(--bg);
+            padding: 15px 20px;
+            border-radius: 10px;
+            position: relative;
+        }
+
+        .timeline-item:nth-child(odd) .timeline-content {
+            margin-right: 5%;
+            text-align: right;
+        }
+
+        .timeline-item:nth-child(even) .timeline-content {
+            margin-left: 5%;
+        }
+
+        .timeline-date {
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        .current-marker {
+            background: linear-gradient(135deg, #fff3cd, #ffeeba);
+            border: 2px solid var(--accent);
+        }
+
+        .current-marker::after {
+            content: '⬅️ 你在这里';
+            position: absolute;
+            right: -100px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.9em;
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        .timeline-item:nth-child(even) .current-marker::after {
+            left: -100px;
+            right: auto;
+        }
+
+        /* Flow Diagram */
+        .flow-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 20px;
+            background: linear-gradient(135deg, #e8f5e9, #e3f2fd);
+            border-radius: 15px;
+        }
+
+        .flow-box {
+            flex: 1;
+            min-width: 120px;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .flow-box.highlight {
+            border: 3px solid var(--accent);
+            background: linear-gradient(135deg, #fff9e6, #fff3cc);
+        }
+
+        .flow-box .percent {
+            font-size: 0.8em;
+            color: var(--text-light);
+        }
+
+        .flow-arrow {
+            font-size: 1.5em;
+            color: var(--secondary);
+        }
+
+        /* Method Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        th {
+            background: var(--bg);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: 500;
+        }
+
+        .badge-easy {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-hard {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Info Cards */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .info-card {
+            background: var(--bg);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            border-left: 4px solid var(--primary);
+        }
+
+        .info-card.recommended {
+            border-left-color: var(--accent);
+            background: linear-gradient(135deg, #fff9e6, #fff3cc);
+        }
+
+        .info-card h4 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .info-card.recommended h4 {
+            color: var(--accent);
+        }
+
+        .info-card p {
+            font-size: 0.9em;
+            color: var(--text-light);
+        }
+
+        /* Code Block */
+        .code-block {
+            background: #1e3a5f;
+            color: #a8d8ea;
+            padding: 15px 20px;
+            border-radius: 10px;
+            font-family: 'SF Mono', monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+        }
+
+        /* Highlight Box */
+        .highlight-box {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            border-left: 4px solid var(--primary);
+            padding: 15px 20px;
+            border-radius: 0 10px 10px 0;
+            margin: 15px 0;
+        }
+
+        .warning-box {
+            background: linear-gradient(135deg, #fff3cd, #ffeeba);
+            border-left: 4px solid var(--accent);
+            padding: 15px 20px;
+            border-radius: 0 10px 10px 0;
+            margin: 15px 0;
+        }
+
+        /* Learning Path */
+        .learning-path {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: var(--bg);
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .path-step {
+            text-align: center;
+            flex: 1;
+        }
+
+        .path-step .icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .path-step .title {
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .path-step .desc {
+            font-size: 0.85em;
+            color: var(--text-light);
+        }
+
+        .path-arrow {
+            font-size: 1.5em;
+            color: var(--secondary);
+        }
+
+        /* Summary Table */
+        .summary-table {
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .summary-table td:first-child {
+            font-weight: 600;
+            width: 30%;
+            color: var(--primary);
+        }
+
+        .summary-table .current {
+            background: linear-gradient(135deg, #fff3cd, #ffeeba);
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-light);
+        }
+
+        @media (max-width: 768px) {
+            .timeline::before {
+                left: 20px;
+            }
+
+            .timeline-item {
+                flex-direction: column !important;
+            }
+
+            .timeline-content {
+                width: 100% !important;
+                margin: 0 0 0 40px !important;
+                text-align: left !important;
+            }
+
+            .flow-container {
+                flex-direction: column;
+            }
+
+            .flow-arrow {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>🌲 单木分离学习全景图</h1>
+            <p>从人生目标到今天的任务 —— 完整定位</p>
+        </header>
+
+        <!-- Section 1: Life Goal -->
+        <section class="section">
+            <h2>🌍 最高层：人生目标</h2>
+
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-content current-marker">
+                        <div class="timeline-date">2026.04</div>
+                        <div>入学新潟大学</div>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-date">2027.10</div>
+                        <div>久保田秋招面试</div>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-date">2028.04</div>
+                        <div>入职久保田<br>自动驾驶感知工程师</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <strong>久保田需要什么？</strong><br>
+                能处理 3D 点云（LiDAR）+ 能做障碍物分割 + 懂深度学习 + 能边缘部署
+            </div>
+        </section>
+
+        <!-- Section 2: Research Direction -->
+        <section class="section">
+            <h2>🎓 研究生阶段：研究方向</h2>
+
+            <div class="info-grid">
+                <div class="info-card">
+                    <h4>🌲 森林研究</h4>
+                    <p>点云分割<br>树木识别<br>参数测量</p>
+                </div>
+                <div class="info-card" style="display: flex; align-items: center; justify-content: center;">
+                    <span style="font-size: 2em;">⟷</span>
+                </div>
+                <div class="info-card recommended">
+                    <h4>🚜 久保田需求</h4>
+                    <p>障碍物分割<br>环境感知<br>实时处理</p>
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <strong>核心洞察</strong>：您在森林里学会的点云处理技术，可以直接用在农田里！
+            </div>
+        </section>
+
+        <!-- Section 3: Two Year Plan -->
+        <section class="section">
+            <h2>📅 两年规划中的位置</h2>
+
+            <table>
+                <tr>
+                    <th>阶段</th>
+                    <th>时间</th>
+                    <th>核心任务</th>
+                    <th>状态</th>
+                </tr>
+                <tr class="current">
+                    <td><strong>入学准备</strong></td>
+                    <td>2026.02</td>
+                    <td>传统方法（DBSCAN、Treeiso）</td>
+                    <td>⬅️ 你在这里</td>
+                </tr>
+                <tr>
+                    <td>M1 上</td>
+                    <td>2026.04-09</td>
+                    <td>深度学习基础、PyTorch</td>
+                    <td>待开始</td>
+                </tr>
+                <tr>
+                    <td>M1 下</td>
+                    <td>2026.10-03</td>
+                    <td>PointNet++ 实现、论文1</td>
+                    <td>待开始</td>
+                </tr>
+                <tr>
+                    <td>M2 上</td>
+                    <td>2027.04-09</td>
+                    <td>边缘部署、论文2</td>
+                    <td>待开始</td>
+                </tr>
+                <tr>
+                    <td>M2 下</td>
+                    <td>2027.10-03</td>
+                    <td>久保田面试、毕业</td>
+                    <td>待开始</td>
+                </tr>
+            </table>
+        </section>
+
+        <!-- Section 4: ITI Position -->
+        <section class="section">
+            <h2>🔬 单木分离在整个流程中的位置</h2>
+
+            <div class="flow-container">
+                <div class="flow-box">
+                    <div>📡</div>
+                    <div><strong>数据获取</strong></div>
+                    <div class="percent">5%</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-box">
+                    <div>🧹</div>
+                    <div><strong>预处理</strong></div>
+                    <div class="percent">15%</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-box highlight">
+                    <div>🌲</div>
+                    <div><strong>单木分离</strong></div>
+                    <div class="percent">25-30% ⬅️</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-box">
+                    <div>📏</div>
+                    <div><strong>参数提取</strong></div>
+                    <div class="percent">20%</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-box">
+                    <div>📊</div>
+                    <div><strong>应用</strong></div>
+                    <div class="percent">30%</div>
+                </div>
+            </div>
+
+            <div class="highlight-box" style="margin-top: 20px;">
+                <strong>单木分离是什么？</strong><br>
+                输入：一片森林的点云（密密麻麻的点）<br>
+                输出：每棵树分开的点云（每棵树不同颜色）<br>
+                <strong>这是整个流程中技术难度最高的一步！</strong>
+            </div>
+        </section>
+
+        <!-- Section 5: Methods -->
+        <section class="section">
+            <h2>🛠️ 单木分离的主流算法</h2>
+
+            <table>
+                <tr>
+                    <th>方法</th>
+                    <th>代表工具</th>
+                    <th>原理</th>
+                    <th>难度</th>
+                </tr>
+                <tr>
+                    <td><strong>聚类</strong></td>
+                    <td>DBSCAN</td>
+                    <td>靠近的点归为一组</td>
+                    <td><span class="badge badge-easy">⭐ 简单</span></td>
+                </tr>
+                <tr>
+                    <td><strong>图割</strong></td>
+                    <td>Treeiso</td>
+                    <td>找最优分割边界</td>
+                    <td><span class="badge badge-medium">⭐⭐ 中等</span></td>
+                </tr>
+                <tr>
+                    <td><strong>深度学习</strong></td>
+                    <td>PointNet++</td>
+                    <td>让神经网络学会分</td>
+                    <td><span class="badge badge-hard">⭐⭐⭐ 复杂</span></td>
+                </tr>
+            </table>
+
+            <h3>📈 您的学习路线</h3>
+            <div class="learning-path">
+                <div class="path-step">
+                    <div class="icon">📦</div>
+                    <div class="title">DBSCAN</div>
+                    <div class="desc">入门 + 记录失败</div>
+                </div>
+                <div class="path-arrow">→</div>
+                <div class="path-step">
+                    <div class="icon">🔗</div>
+                    <div class="title">Treeiso</div>
+                    <div class="desc">进阶 + 对比效果</div>
+                </div>
+                <div class="path-arrow">→</div>
+                <div class="path-step">
+                    <div class="icon">🧠</div>
+                    <div class="title">深度学习</div>
+                    <div class="desc">研究主体</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 6: Treeiso -->
+        <section class="section">
+            <h2>🐍 Treeiso 是什么？</h2>
+
+            <p><strong>Treeiso</strong> 是一个开源 Python 库，专门做单木分离，基于<strong>图割 (Graph-Cut)</strong> 算法。</p>
+
+            <div class="code-block">
+                pip install treeiso
+            </div>
+
+            <h3>为什么老师让您看这个？</h3>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h4>学术前沿</h4>
+                    <p>图割方法是计算机视觉经典理论</p>
+                </div>
+                <div class="info-card">
+                    <h4>处理交叠</h4>
+                    <p>比 DBSCAN 更擅长处理树冠交叠</p>
+                </div>
+                <div class="info-card">
+                    <h4>铺垫深度学习</h4>
+                    <p>理解图结构后更容易学习 GNN</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 7: Dataset -->
+        <section class="section">
+            <h2>📂 数据集选择</h2>
+
+            <div class="info-grid">
+                <div class="info-card recommended">
+                    <h4>✅ San Juan Fault</h4>
+                    <p><strong>推荐使用</strong><br>
+                        针叶林，高密度<br>
+                        已有 RANSAC 结果可对比</p>
+                </div>
+                <div class="info-card">
+                    <h4>StREAM Lab</h4>
+                    <p>混交林<br>
+                        辅助验证用</p>
+                </div>
+            </div>
+
+            <h3>具体文件路径</h3>
+            <div class="code-block">
+                01_Processed/San Juan Fault/Off-Ground_Good-5m.ply
+            </div>
+            <p style="margin-top: 10px; color: var(--text-light);">这是去除地面点后的非地面点云，约 5 米分辨率切片。</p>
+        </section>
+
+        <!-- Section 8: Current Task -->
+        <section class="section">
+            <h2>🎯 您现在要做的事</h2>
+
+            <div class="warning-box">
+                <strong>入学准备阶段目标</strong>：跑通 3 种单木分离方法，对比效果，准备面试演示
+            </div>
+
+            <table class="summary-table">
+                <tr>
+                    <td>人生目标</td>
+                    <td>进入久保田做自动驾驶 ✅</td>
+                </tr>
+                <tr>
+                    <td>研究方向</td>
+                    <td>单木识别 + 参数测量 ✅</td>
+                </tr>
+                <tr>
+                    <td>两年规划</td>
+                    <td>传统→深度学习→边缘部署</td>
+                </tr>
+                <tr class="current">
+                    <td>当前阶段</td>
+                    <td>入学准备（2周）⬅️ 你在这里</td>
+                </tr>
+                <tr class="current">
+                    <td>具体任务</td>
+                    <td>跑通 DBSCAN + Treeiso ⬅️ 今天开始</td>
+                </tr>
+                <tr>
+                    <td>数据选择</td>
+                    <td>San Juan Fault 数据集 ✅</td>
+                </tr>
+            </table>
+
+            <h3 style="margin-top: 25px;">核心产出</h3>
+            <ol style="padding-left: 20px;">
+                <li><strong>对比表</strong>：3 种方法的检测数量、精度</li>
+                <li><strong>失败案例截图</strong>：为深度学习研究铺垫</li>
+                <li><strong>5 分钟演示流程</strong></li>
+            </ol>
+        </section>
+    </div>
+
+    <footer>
+        <p>单木分离学习全景图 | 更新: 2026-01-31</p>
+    </footer>
+</body>
+
+</html>

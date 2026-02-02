@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/Version-2.1-green)
+![Version](https://img.shields.io/badge/Version-2.2-green)
 ![Python](https://img.shields.io/badge/Python-3.11+-blue)
 ![License](https://img.shields.io/badge/License-Academic-orange)
 
@@ -50,11 +50,11 @@ cd /Users/zyc/Downloads/Niigata_Research_Prep
 
 | 功能 | 描述 | 工具 |
 |------|------|------|
-| **GUI 交互界面** | 分页设计，检测+可视化一体 | `gui_app.py` |
-| **命令行检测** | 批量处理，无需界面 | `detect_cylinders_v2.py` |
-| **3D 可视化** | Matplotlib 静态图 + Open3D 交互 | `visualize_forest.py` |
-| **精度验证** | 分层抽样 + RMSE/MAE 计算 | `generate_validation_sample.py` |
-| **生物量分析** | 径阶分布、碳储量估算 | `analyze_forest_data.py` |
+| **GUI 交互界面** | 分页设计，检测+可视化一体 | `tools/gui_app.py` |
+| **命令行检测** | 批量处理，无需界面 | `core/detect_cylinders_v2.py` |
+| **3D 可视化** | Matplotlib 静态图 + Open3D 交互 | `tools/visualize_forest.py` |
+| **精度验证** | 分层抽样 + RMSE/MAE 计算 | `tools/generate_validation_sample.py` |
+| **生物量分析** | 径阶分布、碳储量估算 | `analysis/analyze_forest_data.py` |
 
 ---
 
@@ -63,33 +63,30 @@ cd /Users/zyc/Downloads/Niigata_Research_Prep
 ```
 Niigata_Research_Prep/
 ├── 00_Raw_Data/                    # 原始 LiDAR 数据 (.laz)
-│   ├── SJFE_final_ULS.laz         # San Juan Fault (1.1GB)
-│   └── SL_Winter2021_*.laz        # StREAM Lab (473MB)
 │
 ├── 01_Processed/                   # 预处理后的点云
-│   ├── San Juan Fault/            # 主要研究区域
-│   └── StREAM Lab/                # 辅助验证区域
 │
 ├── 02_Screenshots/                 # 学习过程截图
-│   └── failures/                  # 失败案例记录 (用于深度学习数据工程)
 │
 ├── 03_Scripts/                     # 🐍 核心脚本
 │   ├── run.sh                     # 统一入口
-│   ├── gui_app.py                 # GUI 主程序
-│   ├── tree_utils.py              # RANSAC 算法核心
-│   ├── detect_cylinders_v2.py     # CLI 检测
-│   ├── visualize_forest.py        # 可视化生成
-│   └── MANUAL.md                  # 工具使用手册
+│   ├── core/                      # 核心算法
+│   │   ├── tree_utils.py          # RANSAC 算法核心
+│   │   └── detect_cylinders_v2.py # CLI 检测
+│   ├── pipelines/                 # 完整流程
+│   ├── tools/                     # 工具与可视化
+│   │   ├── gui_app.py             # GUI 主程序
+│   │   └── visualize_forest.py    # 可视化生成
+│   ├── analysis/                  # 数据分析
+│   └── experiments/               # 实验对比
 │
 ├── 04_Results/                     # 输出结果
 │   ├── figures/                   # 图件 (.png)
-│   ├── tables/                    # 数据表 (.csv)
-│   └── reports/                   # 📅 规划与学习文档
-│       ├── path_ab_learning_plan.html      # 深度学习路线图
-│       ├── iti_learning_summary.md         # 短期学习总结
-│       └── graduate_career_roadmap.html    # 两年职业规划
+│   └── tables/                    # 数据表 (.csv)
 │
-├── docs/                           # 📚 项目核心文档
+├── docs/                           # � 项目核心文档
+│   ├── technical/                 # 技术原理与结构
+│   ├── reports/                   # � 实验报告与学习规划
 │   ├── research_master_guideline.html  # 🏆 研究总纲领 (入口)
 │   └── career_skill_mapping.md         # 技能-职业映射
 │
@@ -122,10 +119,10 @@ Niigata_Research_Prep/
 
 ```bash
 # 检测
-python 03_Scripts/detect_cylinders_v2.py
+python 03_Scripts/core/detect_cylinders_v2.py
 
 # 可视化
-python 03_Scripts/visualize_forest.py <path_to_ply>
+python 03_Scripts/tools/visualize_forest.py <path_to_ply>
 ```
 
 ---
@@ -148,7 +145,7 @@ python 03_Scripts/visualize_forest.py <path_to_ply>
 ### 1. 生成分层抽样验证表
 
 ```bash
-python 03_Scripts/generate_validation_sample.py
+python 03_Scripts/tools/generate_validation_sample.py
 ```
 
 输出: `validation_sample.csv`（按 DBH 大小分层抽取 9 棵树）
@@ -160,7 +157,7 @@ python 03_Scripts/generate_validation_sample.py
 ### 3. 计算误差统计
 
 ```bash
-python 03_Scripts/calculate_validation_stats.py
+python 03_Scripts/analysis/calculate_validation_stats.py
 ```
 
 输出: RMSE, MAE, 平均误差等指标
@@ -205,6 +202,7 @@ python 03_Scripts/calculate_validation_stats.py
 
 | 版本 | 日期 | 更新内容 |
 |------|------|----------|
+| v2.2 | 2026-02-02 | 项目结构重构：模块化拆分、文档归档整理 |
 | v2.1 | 2026-01-27 | 分页 GUI、验证工具、3D 预览、显示高度截断 |
 | v2.0 | 2026-01-25 | RANSAC 检测、基础 GUI |
 | v1.0 | 初始 | CloudCompare 手动流程 |
@@ -215,7 +213,7 @@ python 03_Scripts/calculate_validation_stats.py
 
 - **创建者**: zyc
 - **研究方向**: 森林 UAV LiDAR 单木识别
-- **最后更新**: 2026-01-27
+- **最后更新**: 2026-02-02
 
 ---
 

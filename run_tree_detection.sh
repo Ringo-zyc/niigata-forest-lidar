@@ -8,7 +8,7 @@ echo "=================================================="
 echo ""
 
 # 运行圆柱体检测
-bash "/Users/zyc/Downloads/Niigata_Research_Prep/03_Scripts/run_detection_conda.sh"
+bash "/Users/zyc/Downloads/Niigata_Research_Prep/03_Scripts/run.sh" detect
 
 echo ""
 echo "=================================================="
